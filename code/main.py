@@ -60,7 +60,7 @@ if __name__ == '__main__':
     actions_index = params.actions_index
     actions_category = params.actions_category
     #n_train_steps = 1000
-    n_train_steps = 1000
+    n_train_steps = 100
     for it in tqdm.trange(n_train_steps):
         nan_flag = False
         generated = torch.LongTensor(batch_size, max_len)  # upcoming output
@@ -169,5 +169,64 @@ if __name__ == '__main__':
 
         if it%100==0: 
             print('\nloss =', np.array(losses_TB[-100:]).mean(), 'Z =', Z.item(), "R =", np.array(rewards_TB[-100:]).mean() )
-        torch.save(model,save_ckpt_path)
+    torch.save(model,save_ckpt_path)
+        
+    # generated process
+    samples = []
+    generated_path = "result/generated.json"
+    model.eval()
+    # 100 means you want to generate 100 batch_size new test data
+    # since the batch_size here is 2
+    # means 200 generated data
+    for it in tqdm.trange(100):
+        nan_flag = False
+        generated = torch.LongTensor(batch_size, max_len)  # upcoming output
+        generated.fill_(params.pad_index)                  # fill upcoming ouput with <PAD>
+        generated[:,0].fill_(params.bos_index)             # <BOS> (start token), initial state
+
+        # Length of already generated sequences : 1 because of <BOS>
+        #gen_len = (generated != params.pad_index).long().sum(dim=1)
+        gen_len = torch.LongTensor(batch_size,).fill_(1) # (batch_size,)
+        # 1 (True) if the generation of the sequence is not yet finished, 0 (False) otherwise
+        unfinished_sents = gen_len.clone().fill_(1) # (batch_size,)
+        # Length of already generated sequences : 1 because of <BOS>
+        cur_len = 1 
+
+        while cur_len < max_len:
+            state = generated[:,:cur_len] + 0 # (bs, cur_len)
+            with torch.no_grad():
+                tensor = model(state.to(device), lengths=gen_len.to(device)) # (bs, cur_len, vocab_size)
+            #scores = tensor[:,0] # (bs, vocab_size) : use last word for prediction
+            scores = tensor.sum(dim=1) # (bs, vocab_size) 
+            # fixed length generation
+            
+            scores = scores.log_softmax(1)
+            sample_temperature = 1
+            probs = F.softmax(scores / sample_temperature, dim=1)
+            #next_words = torch.distributions.categorical.Categorical(probs=probs).sample()
+            try:
+                next_words = torch.multinomial(probs, 1).squeeze(1)
+            except:
+                nan_flag = True
+                break
+            # update generations / lengths / finished sentences / current length
+
+            generated[:,cur_len] = next_words.cpu() * unfinished_sents + params.pad_index * (1 - unfinished_sents)
+            gen_len.add_(unfinished_sents) # add 1 to the length of the unfinished sentences
+            unfinished_sents.mul_(next_words.cpu().ne(params.eos_index).long()) # as soon as we generate <EOS>, set unfinished_sents to 0
+            cur_len = cur_len + 1
+        
+            # stop when there is a <EOS> in each sentence, or if we exceed the maximul length
+            if unfinished_sents.max() == 0:
+                break
+
+        #R = reward_function(generated, reward_coef, lambda_, beta).to(device)
+        if nan_flag == True:
+            nan_flag = False
+            continue
+
+        samples.extend(generated.numpy())  
+    samples = sample2proxy(samples,gflownet_set.redun_list,gflownet_set.redun_dict,38)
+    transform2json(samples,gflownet_set.proxy_actions_list,generated_path)
+    print(len(samples))
             

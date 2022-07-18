@@ -39,9 +39,10 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logZ = torch.zeros((1,)).to(device)
     n_hid = 256
-    n_layers = 2
+    n_layers = 32
     mlp = make_mlp([params.emb_dim] + [n_hid] * n_layers + [params.n_words]).to(device)
     model = TransformerModel(params, mlp).to(device)
+    print(model)
     P_B = 1 # DAG & sequence generation => tree 
     model = torch.load(gflownet_path)
     batch_size = params.batch_size
@@ -96,3 +97,6 @@ if __name__ == '__main__':
             continue
 
         samples.extend(generated)  
+    samples = sample2proxy(samples,gflownet_set.redun_list,gflownet_set.redun_dict,38)
+    transform2json(samples,gflownet_set.proxy_actions_list,"result.json")
+    print(len(samples))
