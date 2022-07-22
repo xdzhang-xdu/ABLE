@@ -93,13 +93,14 @@ class trafficSet(Dataset):
         for action in self.actions_list:
             current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
             if current_action not in temp_category:
+                temp_category.append(current_action)
                 self.actions_indexes[last_action] = [last_index,i]
                 last_action = current_action
                 last_index = i
-
+                i = i + 1
             else:
-                continue
-            i = i + 1
+                i = i + 1
+            
         self.pad_index = len(self.actions_list) - 2
         self.bos_index = len(self.actions_list) - 1
         self.max_len = len(self.actions_category) + 1

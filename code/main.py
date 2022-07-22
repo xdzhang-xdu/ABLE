@@ -16,7 +16,21 @@ def get_proxy_model(proxy_path):
     proxy_model.load_state_dict(torch.load(proxy_path,map_location='cpu')['state_dict'])
     return proxy_model
 
-
+def judge_generated(x,actions_index,actions_category):
+  x = x.numpy()
+  flag = True
+  index = 0
+  for action_id in x:
+    cur_action_index = actions_index[actions_category[index]]
+    # print(cur_action_index)
+    # print(action_id)
+    if action_id >= cur_action_index[0] and action_id < cur_action_index[1]:
+      index = index + 1
+      continue
+    else:
+      flag = False
+      break
+  return flag
 
 if __name__ == '__main__':
     gflownet_set = trafficSet("data/a_testset_for_double_direction.json",train=False)
@@ -32,10 +46,13 @@ if __name__ == '__main__':
         'actions_list': gflownet_set.actions_list,
         "actions_category":gflownet_set.actions_category,
         "proxy_actions_list":gflownet_set.proxy_actions_list,
+        "proxy_actions_index":gflownet_set.proxy_actions_indexes,
         "emb_dim" : 256, 
         "batch_size": 2
 
     })
+    x = gflownet_set[0]
+    # print(len(params.actions_category))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logZ = torch.zeros((1,)).to(device)
     n_hid = 256
@@ -148,9 +165,24 @@ if __name__ == '__main__':
         #R = reward_function(generated, reward_coef, lambda_, beta).to(device)
         # generated =  [float("".join([str(s_i) for s_i in s])) for s in generated.tolist()]
         # R = reward_function22(generated, reward_coef, lambda_, beta).to(device) 
+        flag_list = []
+        for single in generated:
+            single = single[1:].cpu()
+            flag_list.append(judge_generated(single,actions_category=actions_category,actions_index=params.proxy_actions_index))
         generated = gflow2proxy(generated[:,1:],gflownet_set.redun_list,gflownet_set.redun_dict,batch_size,38)
-        R = proxy_model(generated)
+        flag_index = 0
         
+            
+        R = proxy_model(generated)
+        # for r in R:
+        #     # print(flag_index)
+        #     if flag_list[flag_index] == True:
+        #         flag_index = flag_index + 1
+        #         continue
+        #     else:
+        #         R[flag_index] = 1e-8
+        #         flag_index = flag_index + 1
+        #         continue
         optim.zero_grad()
         if flag :
             ll_diff -= R.log().to(device)
@@ -173,6 +205,7 @@ if __name__ == '__main__':
         
     # generated process
     samples = []
+    samples.append(x[1].numpy())
     generated_path = "result/generated.json"
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
@@ -199,7 +232,12 @@ if __name__ == '__main__':
             #scores = tensor[:,0] # (bs, vocab_size) : use last word for prediction
             scores = tensor.sum(dim=1) # (bs, vocab_size) 
             # fixed length generation
-            
+            # fixed length generation
+            cur_action_index = actions_index[actions_category[cur_len-1]]
+            for index in range(0,cur_action_index[0]):
+                scores[:,index] = -1e8
+            for index in range(cur_action_index[1],max_len):
+                scores[:,index] = -1e8
             scores = scores.log_softmax(1)
             sample_temperature = 1
             probs = F.softmax(scores / sample_temperature, dim=1)
@@ -224,8 +262,11 @@ if __name__ == '__main__':
         if nan_flag == True:
             nan_flag = False
             continue
-
-        samples.extend(generated.numpy())  
+        # print(generated)
+        for single in generated:
+            if judge_generated(single,params.proxy_actions_index,actions_category):
+                samples.extend(single.numpy())  
+    print(samples)
     samples = sample2proxy(samples,gflownet_set.redun_list,gflownet_set.redun_dict,38)
     transform2json(samples,gflownet_set.proxy_actions_list,generated_path)
     print(len(samples))
