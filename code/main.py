@@ -16,21 +16,6 @@ def get_proxy_model(proxy_path):
     proxy_model.load_state_dict(torch.load(proxy_path,map_location='cpu')['state_dict'])
     return proxy_model
 
-def judge_generated(x,actions_index,actions_category):
-  x = x.numpy()
-  flag = True
-  index = 0
-  for action_id in x:
-    cur_action_index = actions_index[actions_category[index]]
-    # print(cur_action_index)
-    # print(action_id)
-    if action_id >= cur_action_index[0] and action_id < cur_action_index[1]:
-      index = index + 1
-      continue
-    else:
-      flag = False
-      break
-  return flag
 
 if __name__ == '__main__':
     gflownet_set = trafficSet("data/a_testset_for_double_direction.json",train=False)
@@ -266,7 +251,7 @@ if __name__ == '__main__':
         for single in generated:
             if judge_generated(single,params.proxy_actions_index,actions_category):
                 samples.extend(single.numpy())  
-    print(samples)
+    # print(samples)
     samples = sample2proxy(samples,gflownet_set.redun_list,gflownet_set.redun_dict,38)
     transform2json(samples,gflownet_set.proxy_actions_list,generated_path)
     print(len(samples))
