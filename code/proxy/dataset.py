@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset,DataLoader
 import re 
 import json
-
+import numpy as np
 
 class trafficSet(Dataset):
     def __init__(self,path,train):
@@ -57,6 +57,8 @@ class trafficSet(Dataset):
         self.actions_indexes['.'] = [len(self.actions_list)-1,len(self.actions_list)] # bos_index and eos_index(.)
         self.pad_index = len(self.actions_list) - 2
         self.bos_index = len(self.actions_list) - 1
+        self.max_len = len(self.actions_category)
+        self.num_tokens = len(self.actions_list)
         # self.embeddings = Embedding(len(self.actions_list),emb_dim,self.actions_indexes[','][0])
     def __getitem__(self, index):
         actions = self.actions[index]
@@ -71,3 +73,8 @@ class trafficSet(Dataset):
         return action,reward
     def __len__(self):
         return len(self.data)
+
+if __name__ == '__main__':
+    train_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=True)
+    print(train_dataset.max_len)
+    print(train_dataset.num_tokens)

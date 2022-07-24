@@ -6,7 +6,7 @@ import tqdm
 import numpy as np
 import torch.nn.functional as F
 
-def get_proxy_model(proxy_path):
+def get_proxy_model(proxy_path,num_tokens,max_len):
     proxy_model =  proxy(num_tokens=154,
                                 num_outputs=1,
                                 num_hid=1024,
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     mlp = make_mlp([params.emb_dim] + [n_hid] * n_layers + [params.n_words]).to(device)
     model = TransformerModel(params, mlp).to(device)
     P_B = 1 # DAG & sequence generation => tree 
-
+    # fix this path
     proxy_path = "ckpt/current_w.pth"
     optim = torch.optim.Adam([ {'params':model .parameters(), 'lr':0.0001}, {'params':[logZ], 'lr':0.01} ])
     logZ.requires_grad_()
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     rewards_TB = []
     l1log_TB = []
 
-    proxy_model = get_proxy_model(proxy_path)
+    proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len)
     proxy_model.eval()
     batch_size = params.batch_size
     max_len = params.max_length + 0

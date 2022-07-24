@@ -59,32 +59,33 @@ def val_epoch(model, criterion, val_dataloader, threshold=0.5):
 
 
 def train(args):
+    
+    # data
+    train_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    val_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=False)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
+    print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # get model 
-    model =  MLP(num_tokens=154,
+    model =  MLP(num_tokens=train_dataset.num_tokens,
                                 num_outputs=1,
                                 num_hid=1024,
                                 num_layers=4, # TODO: add these as hyperparameters?
                                 dropout=0.1,
-                                max_len=38)
+                                max_len=train_dataset.max_len)
 #     if args.ckpt and not args.resume:
 #         state = torch.load(args.ckpt, map_location='cpu')
 #         model.load_state_dict(state['state_dict'])
 #         print('train with pretrained weight val_f1', state['f1'])
     model = model.to(device)
     print(model)
-    # data
-    train_dataset = trafficSet(path = "a_testset_for_double_direction.json",train=True)
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=6)
-    val_dataset = trafficSet(path = "a_testset_for_double_direction.json",train=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=4)
-    print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # optimizer and loss
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     criterion = nn.MSELoss()
     # model save dir
     model_save_dir = '%s/%s_%s' % (args.ckpt, args.model_name, time.strftime("%Y%m%d%H%M"))
     mkdirs(model_save_dir)
-    best_mse = -1
+    best_mse = 100
     lr = args.lr
     start_epoch = 1
     stage = 1
@@ -119,8 +120,8 @@ def train(args):
         # logger.log_value('val_f1', val_f1, step=epoch)
         state = {"state_dict": model.state_dict(), "epoch": epoch, "loss": val_loss, 'mse': val_mse, 'lr': lr,
                  'stage': stage}
-        save_ckpt(state, best_mse < val_mse, model_save_dir)
-        best_mse = max(best_mse, val_mse)
+        save_ckpt(state, best_mse > val_mse, model_save_dir)
+        best_mse = min(best_mse, val_mse)
         print(best_mse)
         if epoch in args.stage_epoch:
             stage += 1
