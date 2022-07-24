@@ -183,9 +183,9 @@ def transform_actions_space(path):
 def normalization_space(action_space):
     pass
 if __name__ == '__main__':
-    datapath = '/home/xdzhang/work/LawBreaker-SourceCode/engines/gflownet/one_scenario/testset_for_double_direction.json'
-    dataspacepath = '/home/xdzhang/work/LawBreaker-SourceCode/engines/gflownet/one_scenario/space_for_double_direction.json'
-    dataset = '/home/xdzhang/work/LawBreaker-SourceCode/engines/gflownet/code/data/a_testset_for_double_direction.json'
+    datapath = '../gflownet/one_scenario/testset_for_double_direction.json'
+    dataspacepath = '../gflownet/one_scenario/space_for_double_direction.json'
+    dataset = '../gflownet/code/data/a_testset_for_double_direction.json'
     action_space = transform_actions_space(datapath)
 
     action_seqs = transform_actions(datapath)
