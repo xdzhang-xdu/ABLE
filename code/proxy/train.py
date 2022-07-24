@@ -8,7 +8,7 @@ import pandas as pd
 from torch import nn, optim
 from torch.utils.data import DataLoader
 import os
-
+from proxy_config import proxy_args
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -58,19 +58,21 @@ def val_epoch(model, criterion, val_dataloader, threshold=0.5):
     return loss_meter / it_count, mse_meter / it_count
 
 
-def train(args):
+def train(proxy_args):
     
     # data
     train_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=True)
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=proxy_args.batch_size, shuffle=True)
     val_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=False)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
+    val_dataloader = DataLoader(val_dataset, batch_size=proxy_args.batch_size)
     print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # get model 
+    print(train_dataset.num_tokens)
+    print(train_dataset.max_len)
     model =  MLP(num_tokens=train_dataset.num_tokens,
                                 num_outputs=1,
-                                num_hid=1024,
-                                num_layers=4, # TODO: add these as hyperparameters?
+                                num_hid=proxy_args.num_hid,
+                                num_layers=proxy_args.num_layers, # TODO: add these as hyperparameters?
                                 dropout=0.1,
                                 max_len=train_dataset.max_len)
 #     if args.ckpt and not args.resume:
@@ -80,13 +82,13 @@ def train(args):
     model = model.to(device)
     print(model)
     # optimizer and loss
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = optim.Adam(model.parameters(), lr=proxy_args.lr)
     criterion = nn.MSELoss()
     # model save dir
-    model_save_dir = '%s/%s_%s' % (args.ckpt, args.model_name, time.strftime("%Y%m%d%H%M"))
+    model_save_dir = '%s/%s_%s' % (proxy_args.ckpt, proxy_args.model_name, time.strftime("%Y%m%d%H%M"))
     mkdirs(model_save_dir)
     best_mse = 100
-    lr = args.lr
+    lr = proxy_args.lr
     start_epoch = 1
     stage = 1
     # train from last save point
@@ -108,7 +110,7 @@ def train(args):
 #             print("=> loaded checkpoint (epoch {})".format(start_epoch - 1))
 #     logger = Logger(logdir=model_save_dir, flush_secs=2)
     # =========>start training<=========
-    for epoch in range(start_epoch, args.max_epoch + 1):
+    for epoch in range(start_epoch, proxy_args.max_epoch + 1):
         since = time.time()
         train_loss, train_mse = train_epoch(model, optimizer, criterion, train_dataloader, show_interval=100)
         val_loss, val_mse = val_epoch(model, criterion, val_dataloader)
@@ -123,12 +125,12 @@ def train(args):
         save_ckpt(state, best_mse > val_mse, model_save_dir)
         best_mse = min(best_mse, val_mse)
         print(best_mse)
-        if epoch in args.stage_epoch:
+        if epoch in proxy_args.stage_epoch:
             stage += 1
-            lr /= args.lr_decay
-            best_w = os.path.join(model_save_dir, args.best_w)
+            lr /= proxy_args.lr_decay
+            best_w = os.path.join(model_save_dir, proxy_args.best_w)
             model.load_state_dict(torch.load(best_w)['state_dict'])
             print("*" * 10, "step into stage%02d lr %.3ef" % (stage, lr))
             adjust_learning_rate(optimizer, lr)
 
-train(args)
+train(proxy_args)

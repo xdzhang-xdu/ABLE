@@ -1,26 +1,26 @@
 from model import TransformerModel, make_mlp
-from proxy import proxy
+from proxy_model import proxy
 from utils import *
 from dataset import trafficSet
 import tqdm
 import numpy as np
 import torch.nn.functional as F
-
-def get_proxy_model(proxy_path,num_tokens,max_len):
-    proxy_model =  proxy(num_tokens=154,
+from config import args
+def get_proxy_model(proxy_path,num_tokens,max_len,num_layers,num_hid):
+    proxy_model =  proxy(num_tokens=num_tokens,
                                 num_outputs=1,
-                                num_hid=1024,
-                                num_layers=4, # TODO: add these as hyperparameters?
+                                num_hid=num_hid,
+                                num_layers=num_layers, # TODO: add these as hyperparameters?
                                 dropout=0.1,
-                                max_len=38)
+                                max_len=max_len)
     proxy_model.load_state_dict(torch.load(proxy_path,map_location='cpu')['state_dict'])
     return proxy_model
 
 
 if __name__ == '__main__':
-    gflownet_set = trafficSet("data/a_testset_for_double_direction.json",train=False)
-    proxy_path = "ckpt/current_w.pth"
-    save_ckpt_path = 'ckpt/gflownet.pth'
+    gflownet_set = trafficSet(args.train_data_path,train=False)
+    proxy_path = args.proxy_path
+    save_ckpt_path = args.save_ckpt_path
     params = AttrDict({
         "n_words": len(gflownet_set.actions_list), 
         "pad_index" : gflownet_set.pad_index, 
@@ -32,21 +32,19 @@ if __name__ == '__main__':
         "actions_category":gflownet_set.actions_category,
         "proxy_actions_list":gflownet_set.proxy_actions_list,
         "proxy_actions_index":gflownet_set.proxy_actions_indexes,
-        "emb_dim" : 256, 
-        "batch_size": 2
+        "emb_dim" : args.emb_dim, 
+        "batch_size": args.batch_size
 
     })
     x = gflownet_set[0]
     # print(len(params.actions_category))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logZ = torch.zeros((1,)).to(device)
-    n_hid = 256
-    n_layers = 2
+    n_hid = args.n_hid
+    n_layers = args.n_layers
     mlp = make_mlp([params.emb_dim] + [n_hid] * n_layers + [params.n_words]).to(device)
     model = TransformerModel(params, mlp).to(device)
     P_B = 1 # DAG & sequence generation => tree 
-    # fix this path
-    proxy_path = "ckpt/current_w.pth"
     optim = torch.optim.Adam([ {'params':model .parameters(), 'lr':0.0001}, {'params':[logZ], 'lr':0.01} ])
     logZ.requires_grad_()
     losses_TB = []
@@ -54,7 +52,7 @@ if __name__ == '__main__':
     rewards_TB = []
     l1log_TB = []
 
-    proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len)
+    proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len,args.proxy_num_layers,args.proxy_num_hid)
     proxy_model.eval()
     batch_size = params.batch_size
     max_len = params.max_length + 0
@@ -62,7 +60,7 @@ if __name__ == '__main__':
     actions_index = params.actions_index
     actions_category = params.actions_category
     #n_train_steps = 1000
-    n_train_steps = 100
+    n_train_steps = args.n_train_steps
     for it in tqdm.trange(n_train_steps):
         nan_flag = False
         generated = torch.LongTensor(batch_size, max_len)  # upcoming output
@@ -191,12 +189,12 @@ if __name__ == '__main__':
     # generated process
     samples = []
     samples.append(x[1].numpy())
-    generated_path = "result/generated.json"
+    generated_path = args.generated_path
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
     # since the batch_size here is 2
     # means 200 generated data
-    for it in tqdm.trange(100):
+    for it in tqdm.trange(args.generated_number):
         nan_flag = False
         generated = torch.LongTensor(batch_size, max_len)  # upcoming output
         generated.fill_(params.pad_index)                  # fill upcoming ouput with <PAD>
