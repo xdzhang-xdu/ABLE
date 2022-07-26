@@ -14,7 +14,7 @@ args = AttrDict(
     # hidden_layers的神经元数量,fix
     "proxy_num_hid":proxy_args.num_hid,
     # proxy model的存放位置
-    "proxy_path":"ckpt/best_w.pth",
+    "proxy_path":"proxy/model/proxy/current_w.pth",
     # gflownet ckpt存放位置
     "save_ckpt_path":'ckpt/gflownet.pth',
     # batch_size 大小这个数字越大越好

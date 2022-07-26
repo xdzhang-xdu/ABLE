@@ -85,7 +85,7 @@ def train(proxy_args):
     optimizer = optim.Adam(model.parameters(), lr=proxy_args.lr)
     criterion = nn.MSELoss()
     # model save dir
-    model_save_dir = '%s/%s_%s' % (proxy_args.ckpt, proxy_args.model_name, time.strftime("%Y%m%d%H%M"))
+    model_save_dir = '%s/%s' % (proxy_args.ckpt, proxy_args.model_name,)
     mkdirs(model_save_dir)
     best_mse = 100
     lr = proxy_args.lr
