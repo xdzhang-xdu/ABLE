@@ -2,7 +2,7 @@ import json
 import os
 
 
-def returnWeatherLevel(value):
+def return_weather_level(value):
     level = 0
     interval_num = 5
     scale = 1.0 / interval_num
@@ -14,7 +14,7 @@ def returnWeatherLevel(value):
             break
     return str(round((level + 0.5) * scale, 2))
 
-def returnOffsetLevel(position):
+def return_offset_level(position):
     higher_bound = 210.0
     interval_num = 10
     offset = position['offset']
@@ -29,7 +29,7 @@ def returnOffsetLevel(position):
             break
     return position['lane'] + '+' + str((level + 0.5) * scale)
 
-def returnSpeedLevel(value):
+def return_speed_level(value):
     if value == 0:
         return "0"
     level = 0
@@ -43,12 +43,12 @@ def returnSpeedLevel(value):
             break
     return str(round((level + 0.5) * scale, 2))
 
-def makeEnvActions(scenario, actionSeq):
+def make_env_actions(scenario, actionSeq):
     # Minute is not considered
     actionSeq.append('time+' + str(scenario['time']['hour']))
-    actionSeq.append('weather+rain+' + returnWeatherLevel(scenario['weather']['rain']))
-    actionSeq.append('weather+wetness+' + returnWeatherLevel(scenario['weather']['wetness']))
-    actionSeq.append('weather+fog+' + returnWeatherLevel(scenario['weather']['fog']))
+    actionSeq.append('weather+rain+' + return_weather_level(scenario['weather']['rain']))
+    actionSeq.append('weather+wetness+' + return_weather_level(scenario['weather']['wetness']))
+    actionSeq.append('weather+fog+' + return_weather_level(scenario['weather']['fog']))
 
 def make_env_actions_space(scenario, actionSpace):
     # Minute is not considered
@@ -65,7 +65,7 @@ def make_env_actions_space(scenario, actionSpace):
         actionSpace['weather+fog+'] = set()
     actionSpace['weather+fog+'].add(round(scenario['weather']['fog'],1))
 
-def makeEgoActions(scenario, actionSeq):
+def make_ego_actions(scenario, actionSeq):
     pos = scenario['ego']['start']['lane_position']
     actionSeq.append('ego+start+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
     actionSeq.append('ego+start+speed+' + str(round(scenario['ego']['start']['speed'], 0)))
@@ -98,7 +98,7 @@ def make_ego_actions_space(scenario, actionSpace):
     actionSpace[type_name].add(round(scenario['ego']['destination']['speed'], 0))
 
 
-def makeNPCActions(scenario, actionSeq):
+def make_npc_actions(scenario, actionSeq):
     for npc in scenario['npcList']:
         npcid = npc['ID']
         pos = npc['start']['lane_position']
@@ -153,25 +153,29 @@ def make_pedestrain_actions(scenario, actionSeq):
 def make_obstacle_actions(scenario, actionSeq):
     pass
 
-def gen_actions(path):
+def generate_actions(path):
     action_sequences = []
     with open(path) as f:
         data = json.load(f)
         for scenario in data:
             print('Handling ' + scenario['ScenarioName'])
-            for_one_scenario = {'ScenarioName': scenario['ScenarioName']}
-            actions = []
-            makeEnvActions(scenario, actions)
-            makeEgoActions(scenario, actions)
-            makeNPCActions(scenario, actions)
-            make_pedestrain_actions(scenario, actions)
-            make_obstacle_actions(scenario, actions)
-            for_one_scenario['actions'] = actions
-            for_one_scenario['robustness'] = scenario['robustness']
-            action_sequences.append(for_one_scenario)
+            action_sequences.append(encode(scenario))
     return action_sequences
 
-def gen_actions_space(path):
+def encode(scenario):
+    for_one_scenario = {'ScenarioName': scenario['ScenarioName']}
+    actions = []
+    make_env_actions(scenario, actions)
+    make_ego_actions(scenario, actions)
+    make_npc_actions(scenario, actions)
+    make_pedestrain_actions(scenario, actions)
+    make_obstacle_actions(scenario, actions)
+    for_one_scenario['actions'] = actions
+    for_one_scenario['robustness'] = scenario['robustness']
+    return for_one_scenario
+
+
+def generate_actions_space(path):
     action_space = {}
     with open(path) as f:
         data = json.load(f)
@@ -188,8 +192,8 @@ def gen_dataset_from_rawdata(session):
     action_dataset_path = '../../code/data/a_testset_for_' + session + '.json'
     action_space_path = '../../code/data/space_for_' + session + '.json'
 
-    action_seqs = gen_actions(raw_data_path)
-    action_space = gen_actions_space(raw_data_path)
+    action_seqs = generate_actions(raw_data_path)
+    action_space = generate_actions_space(raw_data_path)
     # For Debugging
     with open(action_dataset_path, 'w', encoding='utf-8') as f:
         json.dump(action_seqs, f, ensure_ascii=False, indent=4)
