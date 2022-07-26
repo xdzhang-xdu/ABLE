@@ -22,16 +22,14 @@ if __name__ == '__main__':
     proxy_path = args.proxy_path
     save_ckpt_path = args.save_ckpt_path
     params = AttrDict({
-        "n_words": len(gflownet_set.actions_list), 
+        "n_words": len(gflownet_set.proxy_actions_list), 
         "pad_index" : gflownet_set.pad_index, 
         "eos_index" : gflownet_set.bos_index, 
         "bos_index" : gflownet_set.bos_index,
-        'max_length': gflownet_set.max_len,
-        'actions_index':gflownet_set.actions_indexes,
-        'actions_list': gflownet_set.actions_list,
-        "actions_category":gflownet_set.actions_category,
-        "proxy_actions_list":gflownet_set.proxy_actions_list,
-        "proxy_actions_index":gflownet_set.proxy_actions_indexes,
+        'max_length': gflownet_set.proxy_max_len,
+        'actions_index':gflownet_set.proxy_actions_indexes,
+        'actions_list': gflownet_set.proxy_actions_list,
+        "actions_category":gflownet_set.proxy_actions_category,
         "emb_dim" : args.emb_dim, 
         "batch_size": args.batch_size
 
@@ -51,16 +49,20 @@ if __name__ == '__main__':
     zs_TB = []
     rewards_TB = []
     l1log_TB = []
-
+    
     proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len,args.proxy_num_layers,args.proxy_num_hid)
     proxy_model.eval()
     batch_size = params.batch_size
-    max_len = params.max_length + 0
+    max_len = params.max_length + 1
     actions_list = params.actions_list
     actions_index = params.actions_index
     actions_category = params.actions_category
+    # proxy_actions_category = params.proxy_actions_category
     #n_train_steps = 1000
     n_train_steps = args.n_train_steps
+    # print(x[1].shape)
+    # print(judge_generated(x[0],actions_category=params.proxy_actions_category,actions_index=params.proxy_actions_index))
+    # sys.exit(0)
     for it in tqdm.trange(n_train_steps):
         nan_flag = False
         generated = torch.LongTensor(batch_size, max_len)  # upcoming output
@@ -100,10 +102,6 @@ if __name__ == '__main__':
             
             # fixed length generation
             cur_action_index = actions_index[actions_category[cur_len-1]]
-            for index in range(0,cur_action_index[0]):
-                scores[:,index] = -1e8
-            for index in range(cur_action_index[1],max_len):
-                scores[:,index] = -1e8
             
             scores = scores.log_softmax(1)
             
@@ -112,9 +110,15 @@ if __name__ == '__main__':
             # scores = softmax_norm(scores,batch_size,params.n_words)
             # break
             probs = F.softmax(scores / sample_temperature, dim=1)
+            # print(cur_action_index)
+            for index in range(0,cur_action_index[0]):
+                probs[:,index] = 0
+            for index in range(cur_action_index[1],len(actions_list)):
+                probs[:,index] = 0
             # probs = torch.where(torch.isnan(probs),torch.full_like(probs,1e-8),probs)
             try:
                 next_words = torch.multinomial(probs, 1).squeeze(1)
+                #print(next_words)
             except:
                 nan_flag = True
                 break      
@@ -149,23 +153,24 @@ if __name__ == '__main__':
         # generated =  [float("".join([str(s_i) for s_i in s])) for s in generated.tolist()]
         # R = reward_function22(generated, reward_coef, lambda_, beta).to(device) 
         flag_list = []
+        
+        
+        generated = generated[:,1:]
         for single in generated:
-            single = single[1:].cpu()
-            flag_list.append(judge_generated(single,actions_category=actions_category,actions_index=params.proxy_actions_index))
-        generated = gflow2proxy(generated[:,1:],gflownet_set.redun_list,gflownet_set.redun_dict,batch_size,38)
+            flag_list.append(judge_generated(single,actions_category=actions_category,actions_index=actions_index))
         flag_index = 0
         
             
         R = proxy_model(generated)
-        # for r in R:
-        #     # print(flag_index)
-        #     if flag_list[flag_index] == True:
-        #         flag_index = flag_index + 1
-        #         continue
-        #     else:
-        #         R[flag_index] = 1e-8
-        #         flag_index = flag_index + 1
-        #         continue
+        for r in R:
+            # print(flag_index)
+            if flag_list[flag_index] == True:
+                flag_index = flag_index + 1
+                continue
+            else:
+                R[flag_index] = 1e-8
+                flag_index = flag_index + 1
+                continue
         optim.zero_grad()
         if flag :
             ll_diff -= R.log().to(device)
@@ -188,7 +193,8 @@ if __name__ == '__main__':
         
     # generated process
     samples = []
-    samples.append(x[1].numpy())
+    samples.append(list(x[1].numpy()))
+    
     generated_path = args.generated_path
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
@@ -217,13 +223,13 @@ if __name__ == '__main__':
             # fixed length generation
             # fixed length generation
             cur_action_index = actions_index[actions_category[cur_len-1]]
-            for index in range(0,cur_action_index[0]):
-                scores[:,index] = -1e8
-            for index in range(cur_action_index[1],max_len):
-                scores[:,index] = -1e8
             scores = scores.log_softmax(1)
             sample_temperature = 1
             probs = F.softmax(scores / sample_temperature, dim=1)
+            for index in range(0,cur_action_index[0]):
+                probs[:,index] = 0
+            for index in range(cur_action_index[1],len(actions_list)):
+                probs[:,index] = 0
             #next_words = torch.distributions.categorical.Categorical(probs=probs).sample()
             try:
                 next_words = torch.multinomial(probs, 1).squeeze(1)
@@ -247,10 +253,10 @@ if __name__ == '__main__':
             continue
         # print(generated)
         for single in generated:
-            if judge_generated(single,params.proxy_actions_index,actions_category):
-                samples.extend(single.numpy())  
+            if judge_generated(single[1:],actions_category=actions_category,actions_index=actions_index):
+                samples.append(list(single[1:].numpy()))
     # print(samples)
-    samples = sample2proxy(samples,gflownet_set.redun_list,gflownet_set.redun_dict,38)
+    # samples = sample2proxy(np.array(samples),gflownet_set.redun_list,gflownet_set.redun_dict,38)
     transform2json(samples,gflownet_set.proxy_actions_list,generated_path)
     print(len(samples))
             

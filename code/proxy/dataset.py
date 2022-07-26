@@ -68,7 +68,10 @@ class trafficSet(Dataset):
         # action = [self.actions_indexes['.'][0]] + action  # add <BOS> for every action
         action = torch.LongTensor(actions_idx)
         reward = self.rewards[index]
-        reward = np.exp(reward)
+        if reward < 0:
+            reward = np.exp(-reward + 2)
+        else:
+            reward = np.exp(reward)
         # print(index)
         return action,reward
     def __len__(self):

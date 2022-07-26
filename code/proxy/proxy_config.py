@@ -17,7 +17,7 @@ proxy_args = AttrDict(
      "lr_decay" : 10,
     "lr":0.01,
     # 训练epoch数量
-    "max_epoch" : 256,
+    "max_epoch" : 64,
     # saved current weight path
     "current_w" :'current_w.pth',
     # saved best weight path

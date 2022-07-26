@@ -14,11 +14,11 @@ args = AttrDict(
     # hidden_layers的神经元数量,fix
     "proxy_num_hid":proxy_args.num_hid,
     # proxy model的存放位置
-    "proxy_path":"proxy/model/proxy/current_w.pth",
+    "proxy_path":"proxy/model/proxy/best_w.pth",
     # gflownet ckpt存放位置
     "save_ckpt_path":'ckpt/gflownet.pth',
     # batch_size 大小这个数字越大越好
-    "batch_size":128,
+    "batch_size":2,
     # emb_dim emdding vector的维度
     "emb_dim":512,
     # n_layers hidden layers数量 2,4,8选择
@@ -26,7 +26,7 @@ args = AttrDict(
     # hidden neuron数量,越大越好
     "n_hid":256,
     # n_train_steps 训练本身epoch数量,越大越好
-    "n_train_steps":100,
+    "n_train_steps":10,
     # generated_path 生成文件位置
     "generated_path": "result/generated.json",
     # generated_number 生成的数量需要乘以batch_size,才是真正生成的数量

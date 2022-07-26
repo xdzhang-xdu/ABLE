@@ -64,8 +64,12 @@ class trafficSet(Dataset):
                 self.proxy_actions_indexes[self.actions_category[i]] = [self.actions_index[i],len(self.actions_list)]
             i = i + 1
         index = 0
-        self.proxy_max_len = len(self.actions_category)
+        self.proxy_max_len = len(self.actions_category) 
         self.num_tokens = len(self.proxy_actions_list)
+        self.proxy_actions_category = self.actions_category 
+        self.proxy_actions_category = []
+        for action in self.actions[0]:
+          self.proxy_actions_category.append(action[:4] + re.sub(r'[0-9]+', '', action[4:]))
         self.actions_category = []
         for action in self.actions[0]:
           self.actions_category.append(action[:4] + re.sub(r'[0-9]+', '', action[4:]))
@@ -103,8 +107,8 @@ class trafficSet(Dataset):
             else:
                 i = i + 1
             
-        self.pad_index = len(self.actions_list) - 2
-        self.bos_index = len(self.actions_list) - 1
+        self.pad_index = len(self.proxy_actions_list) - 2
+        self.bos_index = len(self.proxy_actions_list) - 1
         self.max_len = len(self.actions_category) + 1
         # self.embeddings = Embedding(len(self.actions_list),emb_dim,self.actions_indexes[','][0])
     def __getitem__(self, index):
@@ -135,3 +139,5 @@ if __name__ == '__main__':
     train_dataset = trafficSet(path = "data/a_testset_for_double_direction.json",train=True)
     print(train_dataset.proxy_max_len)
     print(train_dataset.num_tokens)
+    print(train_dataset.proxy_actions_category)
+    print(train_dataset.actions_category)

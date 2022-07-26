@@ -1,35 +1,42 @@
 import torch
 import json
 import numpy as np
+import sys
 def judge_generated(x,actions_index,actions_category):
+  #print(x)
   x = x.numpy()
   flag = True
   index = 0
   for action_id in x:
     cur_action_index = actions_index[actions_category[index]]
-    # print(cur_action_index)
-    # print(action_id)
-    if action_id >= cur_action_index[0] and action_id < cur_action_index[1]:
+    #print(cur_action_index)
+    #print(action_id)
+    if action_id >= cur_action_index[0] and action_id <= cur_action_index[1]:
       index = index + 1
       continue
     else:
       flag = False
+      #print("FALSE")
       break
+  #sys.exit(0)
   return flag
 def sample2proxy(samples,redun_list,redun_dict,max_len,):
     generated = np.ones(shape=(len(samples),max_len))
-    samples = np.array(samples)
+    #print("samples")
+    #print(samples)
     filled = []
     for redun in redun_list:
         index, action_id = redun_dict[redun]
         generated[:,index] = action_id
         filled.append(index)
     gflow_index = 0
+   # print(samples.shape)
     for i in range(max_len):
         if i in filled:
             continue
         else:
-            generated[:,i] = samples[:,gflow_index]
+            for l in range(len(generated)):
+              generated[l:,i] = samples[l][gflow_index]
             gflow_index = gflow_index + 1
     return generated
 def transform2json(samples,id2action,json_path):
