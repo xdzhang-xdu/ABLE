@@ -50,7 +50,7 @@ if __name__ == '__main__':
     zs_TB = []
     rewards_TB = []
     l1log_TB = []
-    cur_model = None
+    cur_model = model
     proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len,args.proxy_num_layers,args.proxy_num_hid)
     proxy_model.eval()
     batch_size = params.batch_size
@@ -192,9 +192,8 @@ if __name__ == '__main__':
         it = it + batch_size
 
         if it%100==0: 
-            cur_model = model
+            torch.save(model,save_ckpt_path)
             print('\nloss =', np.array(losses_TB[-100:]).mean(), 'Z =', Z.item(), "R =", np.array(rewards_TB[-100:]).mean() )
-    torch.save(cur_model,save_ckpt_path)
     
 
     # generated process
@@ -202,7 +201,7 @@ if __name__ == '__main__':
     samples.append(list(x[1].numpy()))
     
     generated_path = args.generated_path
-    model = cur_model
+    model =torch.load(save_ckpt_path)
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
     # since the batch_size here is 2
