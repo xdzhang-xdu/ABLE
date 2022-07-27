@@ -1,3 +1,4 @@
+from setuptools import find_packages
 from model import TransformerModel, make_mlp
 from proxy_model import proxy
 from utils import *
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     zs_TB = []
     rewards_TB = []
     l1log_TB = []
-    
+    cur_model = None
     proxy_model = get_proxy_model(proxy_path,gflownet_set.num_tokens,gflownet_set.proxy_max_len,args.proxy_num_layers,args.proxy_num_hid)
     proxy_model.eval()
     batch_size = params.batch_size
@@ -176,6 +177,9 @@ if __name__ == '__main__':
             ll_diff -= R.log().to(device)
             loss = (ll_diff**2).sum()/batch_size
         else :
+            Z = Z.to(device)
+            in_probs = in_probs.to(device)
+            R = R.to(device)
             loss = ((Z*in_probs / R).log()**2).sum()/batch_size
         R = R.detach()
         loss.backward()
@@ -188,14 +192,17 @@ if __name__ == '__main__':
         it = it + batch_size
 
         if it%100==0: 
+            cur_model = model
             print('\nloss =', np.array(losses_TB[-100:]).mean(), 'Z =', Z.item(), "R =", np.array(rewards_TB[-100:]).mean() )
-    torch.save(model,save_ckpt_path)
-        
+    torch.save(cur_model,save_ckpt_path)
+    
+
     # generated process
     samples = []
     samples.append(list(x[1].numpy()))
     
     generated_path = args.generated_path
+    model = cur_model
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
     # since the batch_size here is 2
