@@ -1,0 +1,42 @@
+[
+    {
+        "ScenarioName": "NO_0",
+        "actions": [
+            "time+6",
+            "weather+rain+0.9",
+            "weather+wetness+0.9",
+            "weather+fog+0.3",
+            "ego+start+lane_position+lane_623+49.0",
+            "npc1+start+lane_position+lane_627+139.0",
+            "npc1+start+speed+6.0",
+            "npc1+motion+0+lane_position+lane_627+140.0",
+            "npc1+motion+0+speed+6.0",
+            "npc1+motion+1+lane_position+lane_627+151.0",
+            "npc1+motion+1+speed+6.0",
+            "npc1+motion+2+lane_position+lane_627+201.0",
+            "npc1+motion+2+speed+8.0",
+            "npc1+motion+3+lane_position+lane_899+7.0",
+            "npc1+motion+3+speed+3.0",
+            "npc1+motion+4+lane_position+lane_145+10.0",
+            "npc1+motion+4+speed+6.0",
+            "npc1+motion+5+lane_position+lane_145+130.0",
+            "npc1+motion+5+speed+0.0",
+            "npc1+destination+lane_position+lane_145+130.0",
+            "npc2+start+lane_position+lane_627+150.0",
+            "npc2+start+speed+11.0",
+            "npc2+motion+0+lane_position+lane_151+51.0",
+            "npc2+motion+0+speed+0.0",
+            "npc2+destination+lane_position+lane_151+53.0",
+            "npc3+start+lane_position+lane_626+142.0",
+            "npc3+start+speed+8.0",
+            "npc3+motion+0+lane_position+lane_150+52.0",
+            "npc3+motion+0+speed+0.0",
+            "npc3+destination+lane_position+lane_150+52.0",
+            "npc4+start+lane_position+lane_625+147.0",
+            "npc4+start+speed+4.0",
+            "npc4+motion+0+lane_position+lane_149+28.0",
+            "npc4+motion+0+speed+1.0",
+            "npc4+destination+lane_position+lane_149+28.0"
+        ]
+    }
+]
