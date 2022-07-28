@@ -25,7 +25,7 @@ def get_proxy_model(proxy_path,num_tokens,max_len,num_layers,num_hid):
 def generate_samples_with_gfn(session):
     dataset_path = path_args.train_data_path.format(session)
     gflownet_set = trafficSet(dataset_path,train=False)
-    proxy_path = path_args.proxy_path.format(session) + "/best_w.pth"
+    proxy_path = path_args.proxy_path.format(session) + "/current_w.pth"
     save_ckpt_path = path_args.ckpt.format(session)
     params = AttrDict({
         "n_words": len(gflownet_set.proxy_actions_list), 

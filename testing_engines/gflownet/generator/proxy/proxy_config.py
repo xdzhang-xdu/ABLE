@@ -6,7 +6,6 @@ class AttrDict(dict):
 proxy_args = AttrDict(
     {
     "resume": False, 
-    # 存放ckpt的位置
     # batch_size大小,这个数字理论上越大越小
     "batch_size": 128,
     # stage_epoch 每到32,64等epoch,学习率就会衰减变为原本的lr_decay分之一
@@ -20,7 +19,7 @@ proxy_args = AttrDict(
     # saved best weight path
     "best_w" : 'best_w.pth',
     # 神经网络本身层数,这个数字理论上越大越好
-    "num_layers":4,
+    "num_layers":8,
     # hidden_layers的神经元数量,这个参数最好不要进行修改
     "num_hid":1024
 }

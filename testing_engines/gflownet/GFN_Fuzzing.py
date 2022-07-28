@@ -147,14 +147,14 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     covered_specs = list()
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
-    for item in testcases[:11]:
+    for item in testcases:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
             asyncio.gather(asyncio.gather(
                 test_one_scenario(item, remained_specs, covered_specs, reward, directory=file_directory))))
         item["robustness"] = reward
-        logging.info("Current covered specs: {} by scenario {}".format(len(covered_specs), item['ScenarioName']))
+        logging.info("Current covered specs: {} until the scenario {}".format(len(covered_specs), item['ScenarioName']))
         new_dataset.append(item)
     # update dataset
     for cs in covered_specs:
@@ -226,7 +226,7 @@ batch_size = 1
 
 if __name__ == "__main__":
     # sessions = ['double_direction', 'single_direction', 'lane_change']
-    sessions = ['double_direction']
+    sessions = ['single_direction']
     # all_specs and specs_table have the same ordering for each spec
     all_specs, specs_table = load_specifications()
     total_specs_num = len(all_specs)
