@@ -47,7 +47,10 @@ class trafficSet(Dataset):
         i = 0
         action_string = re.sub(r'[0-9]+', '', self.actions_list[0])
         for action in self.actions_list:
-            current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            if len(action) < 13:
+                current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            else:
+                current_action =  action[:14] + re.sub(r'[0-9]+', '', action[14:])
             if current_action not in self.actions_category:
                 self.actions_category = self.actions_category + [current_action]
                 self.actions_index.append(i)
@@ -69,10 +72,18 @@ class trafficSet(Dataset):
         self.proxy_actions_category = self.actions_category 
         self.proxy_actions_category = []
         for action in self.actions[0]:
-          self.proxy_actions_category.append(action[:4] + re.sub(r'[0-9]+', '', action[4:]))
+          if len(action) < 13:
+                current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+          else:
+                current_action =  action[:14] + re.sub(r'[0-9]+', '', action[14:])
+          self.proxy_actions_category.append(current_action)
         self.actions_category = []
         for action in self.actions[0]:
-          self.actions_category.append(action[:4] + re.sub(r'[0-9]+', '', action[4:]))
+          if len(action) < 13:
+                current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+          else:
+                current_action =  action[:14] + re.sub(r'[0-9]+', '', action[14:])
+          self.actions_category.append(current_action)
         remove_category = []
         remove_action = []
         for category in self.actions_category:
@@ -94,10 +105,16 @@ class trafficSet(Dataset):
         self.actions_indexes = {}
         i = 0
         last_index = 0
-        last_action =  self.actions_list[0][:4] + re.sub(r'[0-9]+', '', self.actions_list[0][:4])
+        if len(self.actions_list[0]) < 13:
+            last_action =  self.actions_list[0][:4] + re.sub(r'[0-9]+', '', self.actions_list[0][:4])
+        else:
+            last_action =  self.actions_list[0][:14] + re.sub(r'[0-9]+', '', self.actions_list[0][:41])
         temp_category.append(last_action)
         for action in self.actions_list:
-            current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            if len(action) < 13:
+                current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            else:
+                current_action =  action[:14] + re.sub(r'[0-9]+', '', action[14:])
             if current_action not in temp_category:
                 temp_category.append(current_action)
                 self.actions_indexes[last_action] = [last_index,i]
@@ -136,7 +153,7 @@ class trafficSet(Dataset):
         return len(self.data)
   
 if __name__ == '__main__':
-    train_dataset = trafficSet(path = "data/a_testset_for_double_direction.json",train=True)
+    train_dataset = trafficSet(path = "data/a_testset_for_single_direction.json",train=True)
     print(train_dataset.proxy_max_len)
     print(train_dataset.num_tokens)
     print(train_dataset.proxy_actions_category)

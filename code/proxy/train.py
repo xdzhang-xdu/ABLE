@@ -61,14 +61,16 @@ def val_epoch(model, criterion, val_dataloader, threshold=0.5):
 def train(proxy_args):
     
     # data
-    train_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=True)
+    train_dataset = trafficSet(path = proxy_args.train_data_path,train=True)
     train_dataloader = DataLoader(train_dataset, batch_size=proxy_args.batch_size, shuffle=True)
-    val_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=False)
+    val_dataset = trafficSet(path = proxy_args.train_data_path,train=False)
     val_dataloader = DataLoader(val_dataset, batch_size=proxy_args.batch_size)
     print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # get model 
     print(train_dataset.num_tokens)
     print(train_dataset.max_len)
+    print(train_dataset.num_tokens)
+    
     model =  MLP(num_tokens=train_dataset.num_tokens,
                                 num_outputs=1,
                                 num_hid=proxy_args.num_hid,
@@ -132,5 +134,10 @@ def train(proxy_args):
             model.load_state_dict(torch.load(best_w)['state_dict'])
             print("*" * 10, "step into stage%02d lr %.3ef" % (stage, lr))
             adjust_learning_rate(optimizer, lr)
-
-train(proxy_args)
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_path", type=str, help="the path of train_data")
+    command_args = parser.parse_args()
+    proxy_args.train_data_path = command_args.data_path
+    train(proxy_args)

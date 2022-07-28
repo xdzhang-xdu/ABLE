@@ -7,7 +7,7 @@ proxy_args = AttrDict(
     {
     "resume": False, 
     # 存放ckpt的位置
-    "ckpt" : 'model/',
+    "ckpt" : 'proxy/model/',
     # batch_size大小,这个数字理论上越大越小 
     "batch_size": 128,
     # model_name 本身的名称

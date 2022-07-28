@@ -35,9 +35,13 @@ class trafficSet(Dataset):
         self.actions_dict = {}
         self.actions_index = []
         i = 0
-        action_string = re.sub(r'[0-9]+', '', self.actions_list[0])
+        
         for action in self.actions_list:
-            current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            if len(action) < 13:
+                current_action =  action[:4] + re.sub(r'[0-9]+', '', action[4:])
+            else:
+                current_action =  action[:14] + re.sub(r'[0-9]+', '', action[14:])
+
             if current_action not in self.actions_category:
                 self.actions_category.append(current_action)
                 self.actions_index.append(i)
@@ -45,6 +49,10 @@ class trafficSet(Dataset):
             else:
                 self.actions_dict[current_action].append(action)
             i = i + 1
+        # self.actions_category = []
+        # for action in self.actions[0]:
+        #   self.actions_category.append(action[:4] + re.sub(r'[0-9]+', '', action[4:]))
+        # print(self.actions_category)
         self.actions_indexes= {}
         for i in range(len(self.actions_index)):
             if i != len(self.actions_index) -1 :
@@ -78,6 +86,6 @@ class trafficSet(Dataset):
         return len(self.data)
 
 if __name__ == '__main__':
-    train_dataset = trafficSet(path = "../data/a_testset_for_double_direction.json",train=True)
-    print(train_dataset.max_len)
-    print(train_dataset.num_tokens)
+    train_dataset = trafficSet(path = "data/a_testset_for_single_direction.json",train=True)
+    # print(train_dataset.num_tokens)
+    # print(train_dataset.max_len)

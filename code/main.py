@@ -19,7 +19,11 @@ def get_proxy_model(proxy_path,num_tokens,max_len,num_layers,num_hid):
 
 
 if __name__ == '__main__':
-    gflownet_set = trafficSet(args.train_data_path,train=False)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_path", type=str, help="the path of train_data")
+    command_args = parser.parse_args()
+    gflownet_set = trafficSet(command_args.data_path,train=False)
     proxy_path = args.proxy_path
     save_ckpt_path = args.save_ckpt_path
     params = AttrDict({
@@ -146,6 +150,7 @@ if __name__ == '__main__':
             if unfinished_sents.max() == 0:
                 break
         if nan_flag == True:
+            torch.save(model,save_ckpt_path)
             nan_flag = False
             continue
 

@@ -13,7 +13,10 @@ class MLP(nn.Module):
                  num_layers, max_len=60, dropout=0.1,
                  partition_init=150.0,):
         super(MLP,self).__init__()
+        # print(num_tokens)
+       #  print(max_len)
         self.input = nn.Linear(num_tokens * max_len, num_hid)
+        
         hidden_layers = []
         for _ in range(num_layers):
             hidden_layers.append(nn.Dropout(dropout))
@@ -28,12 +31,13 @@ class MLP(nn.Module):
    
 
     def forward(self, x,  return_all=False, lens=None):
+        # print(x.shape)
         x = self.emb(x)
         # print(x.shape)
         x = x.reshape(x.size(0),-1)
         # print(x.shape)
         out = self.input(x)
-        # out = x.reshape(-1)
+        # print(out.shape)
         out = self.hidden(out)
         out = self.output(out)
         # print(out.shape)
