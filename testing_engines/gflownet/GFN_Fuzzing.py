@@ -205,12 +205,15 @@ def test_session(session, total_specs_num, remained_specs):
     history_data_for_training = get_history_scenarios(session)
     # Active learning loop
     covered_specs = list()
-    for b_index in range(batch_size):
+    for b_index in range(active_learning_loop):
+        start = datetime.now()
         new_testcase_batch = generate_scenarios_batch(session, history_data_for_training)
+        end = datetime.now()
+        logging.info("learning cost: {}".format(end - start))
         # new_testcase_batch = generate_one_scenario()
         batch_covered_specs, batch_testdata = test_scenario_batch(new_testcase_batch, remained_specs, log_direct)
         coverage_rate = 1 - len(remained_specs) / total_specs_num
-        logging.info("Batch: {}, generating new testcases: {}, total coverage rate: {}/{} = {}, "
+        logging.info("Batch index: {}, generating new testcases: {}, total coverage rate: {}/{} = {}, "
                      "new covered predicates: {}\n".format(b_index, len(new_testcase_batch),
                                                            (total_specs_num - len(remained_specs)),
                                                            total_specs_num, coverage_rate, batch_covered_specs))
@@ -222,11 +225,12 @@ def test_session(session, total_specs_num, remained_specs):
     return covered_specs
 
 specs_table = dict()
-batch_size = 1
+active_learning_loop = 5
 
 if __name__ == "__main__":
-    # sessions = ['double_direction', 'single_direction', 'lane_change']
-    sessions = ['single_direction']
+    start = datetime.now()
+    sessions = ['double_direction', 'single_direction', 'lane_change']
+    # sessions = ['lane_change']
     # all_specs and specs_table have the same ordering for each spec
     all_specs, specs_table = load_specifications()
     total_specs_num = len(all_specs)
@@ -237,5 +241,6 @@ if __name__ == "__main__":
         logging.info("Session: {}, total coverage rate: {}/{} = {}, new covered predicates: {}\n".format(session,
            len(all_covered_specs), total_specs_num, len(all_covered_specs) / total_specs_num, session_covered_specs))
     #
-    print("Finished, total coverage rate: {}/{} = {}, the covered predicates: {}\n".format(
-        len(all_covered_specs), total_specs_num, len(all_covered_specs)/total_specs_num, all_covered_specs))
+    end = datetime.now()
+    print("Finished, total coverage rate: {}/{} = {}, total time cost: {}, the covered predicates: {}\n".format(
+        len(all_covered_specs), total_specs_num, len(all_covered_specs)/total_specs_num, (end - start), all_covered_specs))
