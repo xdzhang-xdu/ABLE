@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from shapely.geometry import Point, LineString
 
-directory = 'map/'
+directory = '../../../map/'
 
 
 
