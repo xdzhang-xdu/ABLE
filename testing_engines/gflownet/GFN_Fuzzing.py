@@ -12,6 +12,7 @@ from testing_engines.gflownet.generator.proxy.proxy_config import proxy_args
 from testing_engines.gflownet.generator.proxy.train_proxy import train_proxy
 from generator.generative_model.main import generate_samples_with_gfn
 from generator.pre_process.transform_actions import decode, encode
+from testing_engines.gflownet.lib.InstrumentSetting import launch_apollo, stop_apollo
 from testing_engines.gflownet.lib.monitor import Monitor
 from testing_engines.gflownet.path_config import path_args
 
@@ -66,6 +67,8 @@ async def test_one_scenario(scenario_testcase, specs, covered_specs, reward, dir
                             bug_file.write('\n')
                     monitor = Monitor(output_trace, 0)
                     for spec in specs:
+                        # if spec in covered_specs_7_31:
+                        #     continue
                         if spec in covered_specs:
                             continue
                         robustness = monitor.continuous_monitor2(spec)
@@ -147,7 +150,8 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     covered_specs = list()
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
-    for item in testcases:
+    # just testing half of the batch.
+    for item in testcases[1:65]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
@@ -206,11 +210,15 @@ def test_session(session, total_specs_num, remained_specs):
     # Active learning loop
     covered_specs = list()
     for b_index in range(active_learning_loop):
+        # apollo_pid = launch_apollo()
+        # time.sleep(55)
+        # print("Apollo launching success.")
         start = datetime.now()
         new_testcase_batch = generate_scenarios_batch(session, history_data_for_training)
+        # new_testcase_batch = generate_one_scenario()
         end = datetime.now()
         logging.info("learning cost: {}".format(end - start))
-        # new_testcase_batch = generate_one_scenario()
+
         batch_covered_specs, batch_testdata = test_scenario_batch(new_testcase_batch, remained_specs, log_direct)
         coverage_rate = 1 - len(remained_specs) / total_specs_num
         logging.info("Batch index: {}, generating new testcases: {}, total coverage rate: {}/{} = {}, "
@@ -222,15 +230,61 @@ def test_session(session, total_specs_num, remained_specs):
         dataset_path = path_args.result_path.format(session)
         with open(dataset_path, 'w') as wf:
             json.dump(history_data_for_training, wf, indent=4)
+        # stop_apollo(apollo_pid)
     return covered_specs
 
+
+"""
+" specs formula -> the index in the json file
+"""
 specs_table = dict()
-active_learning_loop = 5
+active_learning_loop = 3
+
+covered_specs_7_31 = [
+    "eventually((fog>=0.5)and(not(speed<=30)))",
+    "eventually((isOverTaking==1)and(not(turnSignal==1)))",
+    "eventually((isOverTaking==1)and((always[-1,2](not(hornOn==1)))and((not(highBeamOn==1))and(not(lowBeamOn==1)))))",
+    "eventually((isOverTaking==1)and(always[0,10](not(turnSignal==2))))",
+    "eventually((isOverTaking==1)and(always[0,10](not(isLaneChanging==1))))",
+    "eventually((((not(streetLightOn==1))and(Time<=7.0))and(not(NPCAheadAhead<=10.0)))and(not(highBeamOn==1)))",
+    "eventually(((fog>=0.5)and(not(NPCAheadAhead<=10.0)))and(not(highBeamOn==1)))",
+    "eventually((fog>=0.5)and(not(fogLightOn==1)))",
+    "eventually((fog>=0.5)and(not(warningflashOn==1)))",
+    "eventually(((trafficLightAheadcolor==3)and(not(NPCAheadAhead<=8.0)))and(always[0,3](not(speed>0.5))))",
+    "eventually(((((trafficLightAheadcolor==2)and(stoplineAhead<=3.5))and(not(stoplineAhead<=0.5)))and(currentLanenumber>0))and(always[0,3](not(speed<0.5))))",
+    "eventually((rain>=0.5)and(not(speed<=30)))",
+    "eventually(((rain>=0.5)and(not(NPCAheadAhead<=10.0)))and(not(highBeamOn==1)))",
+    "eventually((((not(streetLightOn==1))and(Time>=20.0))and(not(NPCAheadAhead<=10.0)))and(not(highBeamOn==1)))",
+    "eventually((((trafficLightAheadcolor==1)and(stoplineAhead<=2.0))and(not(direction==2)))and(always[0,3](not(speed<0.5))))",
+    "eventually((((trafficLightAheadcolor==1)and(junctionAhead<=2.0))and(not(direction==2)))and(always[0,3](not(speed<0.5))))",
+    "eventually(((trafficLightAheadcolor==1)and(stoplineAhead<=2.0))and(always[0,2](not(speed<0.5))))",
+    "eventually(((trafficLightAheadcolor==1)and(junctionAhead<=2.0))and(always[0,2](not(speed<0.5))))",
+    "eventually((((signalAhead==0)and(junctionAhead<=1.0))and(Time<=7.0))and((always[0,3](not(highBeamOn==1)))and(always[0,3](not(lowBeamOn==1)))))",
+    "eventually((((signalAhead==0)and(junctionAhead<=1.0))and(Time>=20.0))and((always[0,3](not(highBeamOn==1)))and(always[0,3](not(lowBeamOn==1)))))",
+    "eventually((isOverTaking==1)and(always[0,10]((isLaneChanging==1)and(not(NearestNPCAhead<=5.0)))))",
+    "eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(NPCAheadAhead<=0.5))",
+    "eventually(((((trafficLightAheadcolor==3)and(junctionAhead<=2.0))and(not(PriorityNPCAhead==1)))and(not(PriorityPedsAhead==1)))and(always[0,2](not(speed>0.5))))",
+    "eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(always[0,3](not(speed>0.5))))",
+    "eventually(((trafficLightAheadcolor==2)and(stoplineAhead<=0.0))and(always[0,2](not(speed>0.5))))",
+    "eventually(((((trafficLightAheadcolor==3)and(direction==1))and(Time<=20.0))and(Time>=7.0))and(not(turnSignal==1)))",
+    "eventually((direction==1)and(not(turnSignal==1)))",
+    "eventually((direction==2)and(not(turnSignal==2)))",
+    "eventually(((isLaneChanging==1)and(currentLanenumber>=2))and(PriorityNPCAhead==1))",
+    "eventually(((((trafficLightAheadcolor==3)and(stoplineAhead<=2.0))and(not(PriorityNPCAhead==1)))and(not(PriorityPedsAhead==1)))and(always[0,2](not(speed>0.5))))",
+    "eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time<=7.0))and(not(turnSignal==1)))",
+    "eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time<=7.0))and(not(lowBeamOn==1)))",
+    "eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))",
+    "eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(turnSignal==1)))",
+    "eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(lowBeamOn==1)))",
+    "eventually((direction==1)and(not(speed<=30)))",
+    "eventually((direction==2)and(not(speed<=30)))"
+]
+
 
 if __name__ == "__main__":
     start = datetime.now()
-    sessions = ['double_direction', 'single_direction', 'lane_change']
-    # sessions = ['lane_change']
+    # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
+    sessions = ['t_junction']
     # all_specs and specs_table have the same ordering for each spec
     all_specs, specs_table = load_specifications()
     total_specs_num = len(all_specs)
@@ -242,5 +296,7 @@ if __name__ == "__main__":
            len(all_covered_specs), total_specs_num, len(all_covered_specs) / total_specs_num, session_covered_specs))
     #
     end = datetime.now()
-    print("Finished, total coverage rate: {}/{} = {}, total time cost: {}, the covered predicates: {}\n".format(
-        len(all_covered_specs), total_specs_num, len(all_covered_specs)/total_specs_num, (end - start), all_covered_specs))
+    result_info = "Finished, total coverage rate: {}/{} = {}, total time cost: {}, the covered predicates: {}\n".format(
+        len(all_covered_specs), total_specs_num, len(all_covered_specs)/total_specs_num, (end - start), all_covered_specs)
+    logging.info(result_info)
+    print(result_info)
