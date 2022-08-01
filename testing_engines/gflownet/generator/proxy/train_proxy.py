@@ -131,4 +131,4 @@ def train_proxy(proxy_args, session = "double_direction"):
             adjust_learning_rate(optimizer, lr)
 
 if __name__ == "__main__":
-    train_proxy(proxy_args, "single_direction")
+    train_proxy(proxy_args, "t_junction")

@@ -382,7 +382,6 @@ def decode(action_sequence, session):
             elif action.startswith("npc4+destination+lane_position+lane_149+"):
                 npc3_dest_offset = action.replace("npc4+destination+lane_position+lane_149+", "")
                 template["npcList"][3]["destination"]["lane_position"]["offset"] = float(npc3_dest_offset)
-
             # For the entities in lane change
             elif action.startswith("ego+start+lane_position+lane_221+"):
                 start_offset = action.replace("ego+start+lane_position+lane_221+", "")
@@ -447,6 +446,182 @@ def decode(action_sequence, session):
             elif action.startswith("npc5+destination+lane_position+lane_253+"):
                 npc1_start_offset = action.replace("npc5+destination+lane_position+lane_253+", "")
                 template["npcList"][4]["destination"]["lane_position"]["offset"] = float(npc1_start_offset)
+            # For the entities in t-junction
+            elif action.startswith("ego+start+lane_position+lane_317+"):
+                start_offset = action.replace("ego+start+lane_position+lane_317+", "")
+                template["ego"]["start"]["lane_position"]["offset"] = float(start_offset)
+            elif action.startswith("ego+destination+lane_position+lane_321+"):
+                dest_offset = action.replace("ego+destination+lane_position+lane_321+", "")
+                template["ego"]["destination"]["lane_position"]["offset"] = float(dest_offset)
+            # NPC1
+            elif action.startswith("npc1+start+lane_position+lane_328+"):
+                npc1_start_offset = action.replace("npc1+start+lane_position+lane_328+", "")
+                template["npcList"][0]["start"]["lane_position"]["offset"] = float(npc1_start_offset)
+            elif action.startswith("npc1+motion+0+lane_position+lane_328+"):
+                npc1_motion_offset = action.replace("npc1+motion+0+lane_position+lane_328+", "")
+                template["npcList"][0]["motion"][0]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+1+lane_position+lane_328+"):
+                npc1_motion_offset = action.replace("npc1+motion+1+lane_position+lane_328+", "")
+                template["npcList"][0]["motion"][1]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+2+lane_position+lane_328+"):
+                npc1_motion_offset = action.replace("npc1+motion+2+lane_position+lane_328+", "")
+                template["npcList"][0]["motion"][2]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+3+lane_position+lane_1158+"):
+                npc1_motion_offset = action.replace("npc1+motion+3+lane_position+lane_1158+", "")
+                template["npcList"][0]["motion"][3]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+4+lane_position+lane_1158+"):
+                npc1_motion_offset = action.replace("npc1+motion+4+lane_position+lane_1158+", "")
+                template["npcList"][0]["motion"][4]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+5+lane_position+lane_320+"):
+                npc1_motion_offset = action.replace("npc1+motion+5+lane_position+lane_320+", "")
+                template["npcList"][0]["motion"][5]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+5+lane_position+lane_320+"):
+                npc1_motion_offset = action.replace("npc1+motion+5+lane_position+lane_320+", "")
+                template["npcList"][0]["motion"][5]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+6+lane_position+lane_1206+"):
+                npc1_motion_offset = action.replace("npc1+motion+6+lane_position+lane_1206+", "")
+                template["npcList"][0]["motion"][6]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc1+motion+6+speed+"):
+                npc1_motion_speed = action.replace("npc1+motion+6+speed+", "")
+                template["npcList"][0]["motion"][6]["speed"] = float(npc1_motion_speed)
+            # NPC2
+            elif action.startswith("npc2+start+lane_position+lane_331+"):
+                npc1_start_offset = action.replace("npc2+start+lane_position+lane_331+", "")
+                template["npcList"][1]["start"]["lane_position"]["offset"] = float(npc1_start_offset)
+            elif action.startswith("npc2+motion+0+lane_position+lane_331+"):
+                npc1_motion_offset = action.replace("npc2+motion+0+lane_position+lane_331+", "")
+                template["npcList"][1]["motion"][0]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+1+lane_position+lane_331+"):
+                npc1_motion_offset = action.replace("npc2+motion+1+lane_position+lane_331+", "")
+                template["npcList"][1]["motion"][1]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+1+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+1+speed+", "")
+                template["npcList"][1]["motion"][1]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+motion+2+lane_position+lane_1160+"):
+                npc1_motion_offset = action.replace("npc2+motion+2+lane_position+lane_1160+", "")
+                template["npcList"][1]["motion"][2]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+2+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+2+speed+", "")
+                template["npcList"][1]["motion"][2]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+motion+3+lane_position+lane_1158+"):
+                npc1_motion_offset = action.replace("npc2+motion+3+lane_position+lane_1158+", "")
+                template["npcList"][1]["motion"][3]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+3+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+3+speed+", "")
+                template["npcList"][1]["motion"][3]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+motion+4+lane_position+lane_321+"):
+                npc1_motion_offset = action.replace("npc2+motion+4+lane_position+lane_321+", "")
+                template["npcList"][1]["motion"][4]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+4+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+4+speed+", "")
+                template["npcList"][1]["motion"][4]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+motion+5+lane_position+lane_321+"):
+                npc1_motion_offset = action.replace("npc2+motion+5+lane_position+lane_321+", "")
+                template["npcList"][1]["motion"][5]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+5+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+5+speed+", "")
+                template["npcList"][1]["motion"][5]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+motion+6+lane_position+lane_321+"):
+                npc1_motion_offset = action.replace("npc2+motion+6+lane_position+lane_321+", "")
+                template["npcList"][1]["motion"][6]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc2+motion+6+speed+"):
+                npc1_motion_speed = action.replace("npc2+motion+6+speed+", "")
+                template["npcList"][1]["motion"][6]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc2+destination+lane_position+lane_321+"):
+                npc2_dest_offset = action.replace("npc2+destination+lane_position+lane_321+", "")
+                template["npcList"][1]["destination"]["lane_position"]["offset"] = float(npc2_dest_offset)
+            # NPC3
+            elif action.startswith("npc3+start+lane_position+lane_330+"):
+                npc1_start_offset = action.replace("npc3+start+lane_position+lane_330+", "")
+                template["npcList"][2]["start"]["lane_position"]["offset"] = float(npc1_start_offset)
+            elif action.startswith("npc3+motion+0+lane_position+lane_330+"):
+                npc1_motion_offset = action.replace("npc3+motion+0+lane_position+lane_330+", "")
+                template["npcList"][2]["motion"][0]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+1+lane_position+lane_330+"):
+                npc1_motion_offset = action.replace("npc3+motion+1+lane_position+lane_330+", "")
+                template["npcList"][2]["motion"][1]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+1+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+1+speed+", "")
+                template["npcList"][2]["motion"][1]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+motion+2+lane_position+lane_1161+"):
+                npc1_motion_offset = action.replace("npc3+motion+2+lane_position+lane_1161+", "")
+                template["npcList"][2]["motion"][2]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+2+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+2+speed+", "")
+                template["npcList"][2]["motion"][2]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+motion+3+lane_position+lane_1157+"):
+                npc1_motion_offset = action.replace("npc3+motion+3+lane_position+lane_1157+", "")
+                template["npcList"][2]["motion"][3]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+3+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+3+speed+", "")
+                template["npcList"][2]["motion"][3]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+motion+4+lane_position+lane_322+"):
+                npc1_motion_offset = action.replace("npc3+motion+4+lane_position+lane_322+", "")
+                template["npcList"][2]["motion"][4]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+4+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+4+speed+", "")
+                template["npcList"][2]["motion"][4]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+motion+5+lane_position+lane_322+"):
+                npc1_motion_offset = action.replace("npc3+motion+5+lane_position+lane_322+", "")
+                template["npcList"][2]["motion"][5]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+5+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+5+speed+", "")
+                template["npcList"][2]["motion"][5]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+motion+6+lane_position+lane_322+"):
+                npc1_motion_offset = action.replace("npc3+motion+6+lane_position+lane_322+", "")
+                template["npcList"][2]["motion"][6]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc3+motion+6+speed+"):
+                npc1_motion_speed = action.replace("npc3+motion+6+speed+", "")
+                template["npcList"][2]["motion"][6]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc3+destination+lane_position+lane_322+"):
+                npc2_dest_offset = action.replace("npc3+destination+lane_position+lane_322+", "")
+                template["npcList"][2]["destination"]["lane_position"]["offset"] = float(npc2_dest_offset)
+            # NPC4
+            elif action.startswith("npc4+start+lane_position+lane_329+"):
+                npc1_start_offset = action.replace("npc4+start+lane_position+lane_329+", "")
+                template["npcList"][3]["start"]["lane_position"]["offset"] = float(npc1_start_offset)
+            elif action.startswith("npc4+motion+0+lane_position+lane_329+"):
+                npc1_motion_offset = action.replace("npc4+motion+0+lane_position+lane_329+", "")
+                template["npcList"][3]["motion"][0]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+1+lane_position+lane_329+"):
+                npc1_motion_offset = action.replace("npc4+motion+1+lane_position+lane_329+", "")
+                template["npcList"][3]["motion"][1]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+1+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+1+speed+", "")
+                template["npcList"][3]["motion"][1]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+motion+2+lane_position+lane_1162+"):
+                npc1_motion_offset = action.replace("npc4+motion+2+lane_position+lane_1162+", "")
+                template["npcList"][3]["motion"][2]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+2+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+2+speed+", "")
+                template["npcList"][3]["motion"][2]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+motion+3+lane_position+lane_1157+"):
+                npc1_motion_offset = action.replace("npc4+motion+3+lane_position+lane_1157+", "")
+                template["npcList"][3]["motion"][3]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+3+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+3+speed+", "")
+                template["npcList"][3]["motion"][3]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+motion+4+lane_position+lane_323+"):
+                npc1_motion_offset = action.replace("npc4+motion+4+lane_position+lane_323+", "")
+                template["npcList"][3]["motion"][4]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+4+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+4+speed+", "")
+                template["npcList"][3]["motion"][4]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+motion+5+lane_position+lane_323+"):
+                npc1_motion_offset = action.replace("npc4+motion+5+lane_position+lane_323+", "")
+                template["npcList"][3]["motion"][5]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+5+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+5+speed+", "")
+                template["npcList"][3]["motion"][5]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+motion+6+lane_position+lane_323+"):
+                npc1_motion_offset = action.replace("npc4+motion+6+lane_position+lane_323+", "")
+                template["npcList"][3]["motion"][6]["lane_position"]["offset"] = float(npc1_motion_offset)
+            elif action.startswith("npc4+motion+6+speed+"):
+                npc1_motion_speed = action.replace("npc4+motion+6+speed+", "")
+                template["npcList"][3]["motion"][6]["speed"] = float(npc1_motion_speed)
+            elif action.startswith("npc4+destination+lane_position+lane_323+"):
+                npc2_dest_offset = action.replace("npc4+destination+lane_position+lane_323+", "")
+                template["npcList"][3]["destination"]["lane_position"]["offset"] = float(npc2_dest_offset)
             else:
                 assert False, "No matching for action: " + action
     return template
@@ -497,7 +672,8 @@ def normalization_space(action_space):
 
 
 if __name__ == '__main__':
-    sessions = ['single_direction', 'double_direction', 'lane_change']
+    # sessions = ['single_direction', 'double_direction', 'lane_change']
+    sessions = ['t_junction']
     for session in sessions:
         print("Handling {}".format(session))
         # gen_dataset_from_rawdata(session)
