@@ -641,23 +641,24 @@ def gen_dataset_from_rawdata(session):
     action_seqs = None
     raw_data_path = '../../rawdata/one_scenario/testset_for_' + session + '.json'
     action_dataset_path = '../data/a_testset_for_' + session + '.json'
-    action_space_path = '../../code/data/space_for_' + session + '.json'
+    action_space_path = '../data/space_for_' + session + '.json'
 
-    action_seqs = generate_actions(raw_data_path)
-    # action_space = generate_actions_space(raw_data_path)
+    # action_seqs = generate_actions(raw_data_path)
+    action_space = generate_actions_space(raw_data_path)
     # For Debugging
-    with open(action_dataset_path, 'w', encoding='utf-8') as f:
-        json.dump(action_seqs, f, ensure_ascii=False, indent=4)
-    # with open(action_space_path, 'w', encoding='utf-8') as f:
-    #     for key, value in action_space.items():
-    #         action_space[key] = sorted(list(value))
-    #     json.dump(action_space, f, ensure_ascii=False, indent=4)
+    # with open(action_dataset_path, 'w', encoding='utf-8') as f:
+    #     json.dump(action_seqs, f, ensure_ascii=False, indent=4)
+    with open(action_space_path, 'w', encoding='utf-8') as f:
+        for key, value in action_space.items():
+            action_space[key] = sorted(list(value))
+        json.dump(action_space, f, ensure_ascii=False, indent=4)
     return action_seqs
 
 
 def generate_scenarios_batch(session):
     test_cases_batch = []
-    data_path = '../data/a_testset_for_{}.json'.format(session)
+    # data_path = '../data/a_testset_for_{}.json'.format(session)
+    data_path = "/home/xdzhang/work/shortgun/testing_engines/gflownet/generator/data/one_action_sequence.json"
     with open(data_path) as file:
         dataset = json.load(file)
         for item in dataset:
@@ -676,5 +677,5 @@ if __name__ == '__main__':
     sessions = ['t_junction']
     for session in sessions:
         print("Handling {}".format(session))
-        # gen_dataset_from_rawdata(session)
-        generate_scenarios_batch(session)
+        gen_dataset_from_rawdata(session)
+        # generate_scenarios_batch(session)

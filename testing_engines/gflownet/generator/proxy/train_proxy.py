@@ -111,8 +111,8 @@ def train_proxy(proxy_args, session = "double_direction"):
         since = time.time()
         train_loss, train_mse = train_epoch(device, model, optimizer, criterion, train_dataloader, show_interval=100)
         val_loss, val_mse = val_epoch(device, model, criterion, val_dataloader)
-        print('#epoch:%02d stage:%d train_loss:%.3e train_mse:%.3f  val_loss:%0.3e val_mse:%.3f time:%s'
-              % (epoch, stage, train_loss, train_mse, val_loss, val_mse, print_time_cost(since)))
+        # print('#epoch:%02d stage:%d train_loss:%.3e train_mse:%.3f  val_loss:%0.3e val_mse:%.3f time:%s'
+        #       % (epoch, stage, train_loss, train_mse, val_loss, val_mse, print_time_cost(since)))
         # logger.log_value('train_loss', train_loss, step=epoch)
         # logger.log_value('train_f1', train_f1, step=epoch)
         # logger.log_value('val_loss', val_loss, step=epoch)
@@ -121,8 +121,8 @@ def train_proxy(proxy_args, session = "double_direction"):
                  'stage': stage}
         save_ckpt(state, best_mse > val_mse, model_save_dir)
         best_mse = min(best_mse, val_mse)
-        print("Best MSE: {}".format(best_mse))
         if epoch in proxy_args.stage_epoch:
+            print("Best MSE: {}".format(best_mse))
             stage += 1
             lr /= proxy_args.lr_decay
             best_w = os.path.join(model_save_dir, proxy_args.best_w)

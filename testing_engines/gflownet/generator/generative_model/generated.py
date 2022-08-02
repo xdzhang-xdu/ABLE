@@ -19,7 +19,7 @@ def get_proxy_model(proxy_path):
 
 
 if __name__ == '__main__':
-    gflownet_set = trafficSet("../data/a_testset_for_double_direction.json", train=False)
+    gflownet_set = trafficSet("../data/dataset/a_testset_for_double_direction.json", train=False)
     gflownet_path = 'ckpt/gflownet.pth'
 
     params = AttrDict({

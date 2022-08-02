@@ -8,9 +8,9 @@ path_args = AttrDict(
         "test_result_direct": "/data/xdzhang/{}",
         "spec_path": "rawdata/specs/spec_data.json",
         # data for training
-        "train_data_path": "generator/data/a_testset_for_{}.json",
+        "train_data_path": "generator/data/testset/a_testset_for_{}.json",
         # template for generating scenarios quickly
-        "template_path": "generator/data/template_for_{}.json",
+        "template_path": "generator/data/templates/template_for_{}.json",
         # GFlownet model path
         "ckpt": "generator/ckpt/{}_gfn.pkl",
         # proxy path
