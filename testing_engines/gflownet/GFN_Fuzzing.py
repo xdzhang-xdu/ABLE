@@ -15,6 +15,7 @@ from testing_engines.gflownet.generator.pre_process.transform_actions import dec
 from testing_engines.gflownet.lib.InstrumentSetting import launch_apollo, stop_apollo
 from testing_engines.gflownet.lib.monitor import Monitor
 from testing_engines.gflownet.path_config import path_args
+from testing_engines.gflownet.tools.remove_useless_action import remove_useless_action
 
 
 async def test_one_scenario(scenario_testcase, specs, covered_specs, reward, directory=None) -> object:
@@ -152,7 +153,7 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
     # just testing half of the batch.
-    for item in testcases[1:]:
+    for item in testcases[1:65]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
@@ -176,6 +177,7 @@ def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, ses
             specs_covered_flag[specs_to_index[item] - 1] = 1
         else:
             specs_covered_flag[specs_to_index[item] - 1] = 0
+
     # encode the newly-generated scenarios to action sequence
     batch_testdata_seq = []
     idx = 0
@@ -186,6 +188,7 @@ def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, ses
         action_seq["ScenarioName"] = ScenarioName
         batch_testdata_seq.append(action_seq)
         idx += 1
+    remove_useless_action(batch_testdata_seq, session)
     # update reward values in the new set
     history_data.extend(batch_testdata_seq)
     for item in history_data:

@@ -17,6 +17,7 @@ path_args = AttrDict(
         "proxy_path": "generator/proxy/model/{}",
         # result path from gfl model
         "in_process_dataset_path": "generator/result/action_sequence_{}.json",
-        "new_batch_path": "generator/result/new_action_sequence_{}.json"
+        "new_batch_path": "generator/result/new_action_sequence_{}.json",
+        "space_path": "generator/data/action_space/space_for_{}.json"
     }
 )
