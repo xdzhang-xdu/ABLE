@@ -1,3 +1,4 @@
+import copy
 import os
 import shutil
 import sys
@@ -303,13 +304,14 @@ covered_specs_7_31 = [
 if __name__ == "__main__":
     start = datetime.now()
     # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    sessions = ['double_direction', 'single_direction']
+    sessions = ['single_direction', 'lane_change', 't_junction']
     # all_specs and specs_to_index have the same ordering for each spec
     all_specs, specs_to_index = load_specifications()
     total_specs_num = len(all_specs)
     all_covered_specs = list()
     for session in sessions:
-        session_covered_specs = test_session(session, total_specs_num, all_specs)
+        remind_specs = copy.deepcopy(all_specs)
+        session_covered_specs = test_session(session, total_specs_num, remind_specs)
         all_covered_specs.extend(session_covered_specs)
         logging.info("Session: {}, total coverage rate: {}/{} = {}, new covered predicates: {}\n".format(session,
            len(all_covered_specs), total_specs_num, len(all_covered_specs) / total_specs_num, session_covered_specs))
