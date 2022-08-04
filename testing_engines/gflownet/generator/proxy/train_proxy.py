@@ -5,7 +5,7 @@ import pandas as pd
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from testing_engines.gflownet.generator.proxy.mlp_model import MLP
-from testing_engines.gflownet.generator.proxy.dataset import TrafficSet
+from testing_engines.gflownet.generator.proxy.dataset import ProxySet
 from testing_engines.gflownet.generator.proxy.utils import *
 from testing_engines.gflownet.path_config import path_args
 
@@ -55,13 +55,13 @@ def val_epoch(device, model, criterion, val_dataloader, threshold=0.5):
     return loss_meter / it_count, mse_meter / it_count
 
 
-def train_proxy(proxy_args, session = "double_direction"):
+def train_proxy(proxy_args, dataset, session = "double_direction"):
     print("Start training proxy.")
     # data
-    dataset_path = path_args.train_data_path.format(session)
-    train_dataset = TrafficSet(path=dataset_path, train=True)
+    # dataset_path = dataset_path_form.format(session)
+    train_dataset = ProxySet(dataset, train=True)
     train_dataloader = DataLoader(train_dataset, batch_size=proxy_args.batch_size, shuffle=True)
-    val_dataset = TrafficSet(path=dataset_path, train=False)
+    val_dataset = ProxySet(dataset, train=False)
     val_dataloader = DataLoader(val_dataset, batch_size=proxy_args.batch_size)
     print("train_datasize", len(train_dataset), "val_datasize", len(val_dataset))
     # get model 

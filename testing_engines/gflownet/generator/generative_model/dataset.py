@@ -10,10 +10,8 @@ import numpy as np
 # deleted version only 14 states left 
 
 
-class trafficSet(Dataset):
-    def __init__(self,path,train,g_flag=False):
-        with open(path,'r') as f:
-              testset = json.load(f)
+class GFNSet(Dataset):
+    def __init__(self, testset, train, g_flag=False):
         actions_set = set()
         self.actions = []
         self.rewards = []
@@ -146,14 +144,14 @@ class trafficSet(Dataset):
         state = torch.LongTensor(state_idx)
         proxy_state = torch.LongTensor(proxy_idx)
         reward = self.rewards[index]
-        reward = np.exp(reward)
+        # reward = np.exp(reward)
         # print(index)
         return proxy_state,state,reward
     def __len__(self):
         return len(self.data)
   
 if __name__ == '__main__':
-    train_dataset = trafficSet(path = "data/a_testset_for_single_direction.json",train=True)
+    train_dataset = GFNSet(path ="data/a_testset_for_single_direction.json", train=True)
     print(train_dataset.proxy_max_len)
     print(train_dataset.num_tokens)
     print(train_dataset.proxy_actions_category)

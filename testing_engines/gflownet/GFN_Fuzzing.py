@@ -10,8 +10,8 @@ import logging
 
 from testing_engines.gflownet.generator.proxy.proxy_config import proxy_args
 from testing_engines.gflownet.generator.proxy.train_proxy import train_proxy
-from generator.generative_model.main import generate_samples_with_gfn
-from generator.pre_process.transform_actions import decode, encode
+from testing_engines.gflownet.generator.generative_model.main import generate_samples_with_gfn
+from testing_engines.gflownet.generator.pre_process.transform_actions import decode, encode
 from testing_engines.gflownet.lib.InstrumentSetting import launch_apollo, stop_apollo
 from testing_engines.gflownet.lib.monitor import Monitor
 from testing_engines.gflownet.path_config import path_args
@@ -72,7 +72,7 @@ async def test_one_scenario(scenario_testcase, specs, covered_specs, reward, dir
                         if spec in covered_specs:
                             continue
                         robustness = monitor.continuous_monitor2(spec)
-                        reward[specs_table[spec]] = robustness
+                        reward[specs_to_index[spec]] = robustness
                         if robustness < 0.0:
                             continue
                         covered_specs.append(spec)
@@ -112,16 +112,17 @@ def get_history_scenarios(session):
     return dataset
 
 
-def generate_scenarios_batch(session, test_cases_for_training):
+def generate_scenarios_batch(dataset, session):
     # Train model to generate new scenarios to files
-    train_proxy(proxy_args, session)
-    generate_samples_with_gfn(session)
+    train_proxy(proxy_args, dataset, session)
+    new_batch = generate_samples_with_gfn(dataset, session)
+    # For debug
+    with open(path_args.new_batch_path.format(session), 'w', encoding='utf-8') as file:
+        json.dump(new_batch, file, indent=4)
     #
     test_cases_batch = []
-    with open(path_args.result_path.format(session)) as file:
-        dataset = json.load(file)
-        for item in dataset:
-            test_cases_batch.append(decode(item, session))
+    for item in new_batch:
+        test_cases_batch.append(decode(item, session))
     return test_cases_batch
 
 
@@ -151,7 +152,7 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
     # just testing half of the batch.
-    for item in testcases[1:65]:
+    for item in testcases[1:]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
@@ -160,33 +161,50 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
         item["robustness"] = reward
         logging.info("Current covered specs: {} until the scenario {}".format(len(covered_specs), item['ScenarioName']))
         new_dataset.append(item)
-    # update dataset
+    # remove covered specs from remained_specs
     for cs in covered_specs:
         remained_specs.remove(cs)
     # print("Uncovered specs after batch {}: {}".format(batch_no, len(remain_specs)))
     return covered_specs, new_dataset
 
 
-def update_dataset(history_data_for_training, batch_testdata, remained_specs):
-    result = list()
-    # update robustness values
-    for item in history_data_for_training:
-        usable_robust = []
-        for remain in remained_specs:
-            usable_robust.append(item['robustness'][specs_table[remain]])
-        item['robustness'][0] = -max(usable_robust)
-    result.extend(history_data_for_training)
-    # merge newly-generated scenarios
+def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, session):
+    specs_covered_flag = [1]*81 # 1 stands for the corresponding spec is uncovered, otherwise.
+    all_specs, _ = load_specifications()
+    for item in all_specs:
+        if item in remained_specs:
+            specs_covered_flag[specs_to_index[item] - 1] = 1
+        else:
+            specs_covered_flag[specs_to_index[item] - 1] = 0
+    # encode the newly-generated scenarios to action sequence
+    batch_testdata_seq = []
     idx = 0
     for item in batch_testdata:
-        ScenarioName = item["ScenarioName"] + "_" + str(idx)
+        ScenarioName = item["ScenarioName"] + "_new_" + str(idx)
         item['robustness'][0] = -max(list(item['robustness']))
         action_seq = encode(item)
         action_seq["ScenarioName"] = ScenarioName
-        # tmp = {"ScenarioName":ScenarioName, "actions":action_seq["actions"], "robustness":item['robustness']}
-        result.append(action_seq)
+        batch_testdata_seq.append(action_seq)
         idx += 1
-    return result
+    # update reward values in the new set
+    history_data.extend(batch_testdata_seq)
+    for item in history_data:
+        reward = 0.0
+        robust = item["robustness"][1:]
+        for i in range(81):
+            if robust[i] >= 0:
+                distance = 0
+            else:
+                distance = -robust[i]
+            reward += (specs_weight[i]*specs_covered_flag[i] / (distance + 1.0))
+        item["robustness"][0] = reward
+        # item["robustness"][0] = -max(item["robustness"][1:])
+    # For debug
+    dataset_path = path_args.in_process_dataset_path.format(session)
+    with open(dataset_path, 'w') as wf:
+        json.dump(history_data, wf, indent=4)
+
+    return history_data
 
 
 def test_session(session, total_specs_num, remained_specs):
@@ -206,7 +224,7 @@ def test_session(session, total_specs_num, remained_specs):
                         format='%(asctime)s, %(levelname)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
     logging.info("Current Session: {}".format(session))
     # Initialize Batch_0
-    history_data_for_training = get_history_scenarios(session)
+    history_data = get_history_scenarios(session)
     # Active learning loop
     covered_specs = list()
     for b_index in range(active_learning_loop):
@@ -214,7 +232,7 @@ def test_session(session, total_specs_num, remained_specs):
         # time.sleep(55)
         # print("Apollo launching success.")
         start = datetime.now()
-        new_testcase_batch = generate_scenarios_batch(session, history_data_for_training)
+        new_testcase_batch = generate_scenarios_batch(history_data, session)
         # new_testcase_batch = generate_one_scenario()
         end = datetime.now()
         logging.info("learning cost: {}".format(end - start))
@@ -226,10 +244,7 @@ def test_session(session, total_specs_num, remained_specs):
                                                            (total_specs_num - len(remained_specs)),
                                                            total_specs_num, coverage_rate, batch_covered_specs))
         covered_specs.extend(batch_covered_specs)
-        history_data_for_training = update_dataset(history_data_for_training, batch_testdata, remained_specs)
-        dataset_path = path_args.result_path.format(session)
-        with open(dataset_path, 'w') as wf:
-            json.dump(history_data_for_training, wf, indent=4)
+        history_data = merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, session)
         # stop_apollo(apollo_pid)
     return covered_specs
 
@@ -237,8 +252,9 @@ def test_session(session, total_specs_num, remained_specs):
 """
 " specs formula -> the index in the json file
 """
-specs_table = dict()
-active_learning_loop = 3
+specs_to_index = dict()
+specs_weight = [1]*81
+active_learning_loop = 4
 
 covered_specs_7_31 = [
     "eventually((fog>=0.5)and(not(speed<=30)))",
@@ -284,9 +300,9 @@ covered_specs_7_31 = [
 if __name__ == "__main__":
     start = datetime.now()
     # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    sessions = ['t_junction']
-    # all_specs and specs_table have the same ordering for each spec
-    all_specs, specs_table = load_specifications()
+    sessions = ['double_direction', 'single_direction']
+    # all_specs and specs_to_index have the same ordering for each spec
+    all_specs, specs_to_index = load_specifications()
     total_specs_num = len(all_specs)
     all_covered_specs = list()
     for session in sessions:

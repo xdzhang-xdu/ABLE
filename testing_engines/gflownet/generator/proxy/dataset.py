@@ -8,10 +8,8 @@ import json
 import numpy as np
 
 
-class TrafficSet(Dataset):
-    def __init__(self, path, train):
-        with open(path, 'r') as f:
-            testset = json.load(f)
+class ProxySet(Dataset):
+    def __init__(self, testset, train):
         actions_set = set()
         self.actions = []
         self.rewards = []
@@ -78,11 +76,11 @@ class TrafficSet(Dataset):
         # action = [self.actions_indexes['.'][0]] + action  # add <BOS> for every action
         action = torch.LongTensor(actions_idx)
         reward = self.rewards[index]
-        if reward < 0:
-            reward = np.exp(-reward + 2)
-        else:
-            reward = np.exp(reward)
-        # print(index)
+        # if reward < 0:
+        #     reward = np.exp(-reward + 2)
+        # else:
+        #     reward = np.exp(reward)
+        # print(index, reward)
         return action, reward
 
     def __len__(self):
@@ -90,6 +88,6 @@ class TrafficSet(Dataset):
 
 
 if __name__ == '__main__':
-    train_dataset = TrafficSet(path="data/a_testset_for_single_direction.json", train=True)
+    train_dataset = ProxySet(path="data/a_testset_for_single_direction.json", train=True)
     # print(train_dataset.num_tokens)
     # print(train_dataset.max_len)

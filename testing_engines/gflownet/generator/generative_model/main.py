@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from testing_engines.gflownet.generator.generative_model.model import TransformerModel, make_mlp
 from testing_engines.gflownet.generator.generative_model.proxy_model import proxy
 from testing_engines.gflownet.generator.generative_model.utils import *
-from testing_engines.gflownet.generator.generative_model.dataset import trafficSet
+from testing_engines.gflownet.generator.generative_model.dataset import GFNSet
 from testing_engines.gflownet.generator.generative_model.config import args
 from testing_engines.gflownet.path_config import path_args
 
@@ -22,10 +22,10 @@ def get_proxy_model(proxy_path,num_tokens,max_len,num_layers,num_hid):
     return proxy_model
 
 
-def generate_samples_with_gfn(session):
-    dataset_path = path_args.train_data_path.format(session)
-    gflownet_set = trafficSet(dataset_path,train=False)
-    proxy_path = path_args.proxy_path.format(session) + "/current_w.pth"
+def generate_samples_with_gfn(dataset, session):
+    # dataset_path = dataset_path_form.format(session)
+    gflownet_set = GFNSet(dataset, train=False)
+    proxy_path = path_args.proxy_path.format(session) + "/best_w.pth"
     save_ckpt_path = path_args.ckpt.format(session)
     params = AttrDict({
         "n_words": len(gflownet_set.proxy_actions_list), 
@@ -205,7 +205,6 @@ def generate_samples_with_gfn(session):
     # generating process
     samples = []
     samples.append(list(x[1].numpy()))
-    generated_path = path_args.result_path.format(session)
     model = torch.load(save_ckpt_path)
     model.eval()
     # 100 means you want to generate 100 batch_size new test data
@@ -266,8 +265,13 @@ def generate_samples_with_gfn(session):
         for single in generated:
             if judge_generated(single[1:],actions_category=actions_category,actions_index=actions_index):
                 samples.append(list(single[1:].numpy()))
-    transform2json(samples, gflownet_set.proxy_actions_list, generated_path)
-    print("New samples {}".format(len(samples)))
+    result = transform2json(samples, gflownet_set.proxy_actions_list)
+    print("New samples {}".format(len(result)))
+    # For debug
+    generated_path = path_args.new_batch_path.format(session)
+    with open(generated_path,'w') as wf:
+        json.dump(result, wf, indent=4)
+    return result
 
 if __name__ == '__main__':
-    generate_samples_with_gfn("single_direction")
+    generate_samples_with_gfn("t_junction")

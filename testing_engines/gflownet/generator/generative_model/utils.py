@@ -40,7 +40,7 @@ def sample2proxy(samples,redun_list,redun_dict,max_len,):
             gflow_index = gflow_index + 1
     return generated
 
-def transform2json(samples, id2action, json_path):
+def transform2json(samples, id2action):
     json_list = []
     index = 0
     for sample in samples:
@@ -49,8 +49,7 @@ def transform2json(samples, id2action, json_path):
         sample_dict['actions'] = [id2action[int(action)] for action in sample]
         json_list.append(sample_dict)
         index = index + 1
-    with open(json_path,'w') as wf:
-        json.dump(json_list, wf, indent=4)
+    return json_list
 
 def gflow2proxy(gflow, redun_list, redun_dict,batch_size,proxy_max_len):
   generated = torch.LongTensor(batch_size, proxy_max_len)

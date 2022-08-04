@@ -5,7 +5,7 @@ class AttrDict(dict):
 path_args = AttrDict(
     {
         # testing result data
-        "test_result_direct": "/data/xdzhang/{}",
+        "test_result_direct": "/data/xdzhang/apollo7/shortgun-8.4/{}",
         "spec_path": "rawdata/specs/spec_data.json",
         # data for training
         "train_data_path": "generator/data/testset/a_testset_for_{}.json",
@@ -16,6 +16,7 @@ path_args = AttrDict(
         # proxy path
         "proxy_path": "generator/proxy/model/{}",
         # result path from gfl model
-        "result_path": "generator/result/action_sequence_{}.json"
+        "in_process_dataset_path": "generator/result/action_sequence_{}.json",
+        "new_batch_path": "generator/result/new_action_sequence_{}.json"
     }
 )
