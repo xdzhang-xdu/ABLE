@@ -25,6 +25,8 @@ class GFNSet(Dataset):
             self.rewards.append(tset['robustness'][0])
             for action in tset['actions']:
                     actions_set.add(action)
+        self.proxy_max_len = len(self.actions[0]) 
+        self.max_len = len(self.actions[0]) 
         if g_flag is False:
           if train is True:
               self.data = self.actions[:int(len(self.actions)*0.8)]
@@ -65,7 +67,6 @@ class GFNSet(Dataset):
                 self.proxy_actions_indexes[self.actions_category[i]] = [self.actions_index[i],len(self.actions_list)]
             i = i + 1
         index = 0
-        self.proxy_max_len = len(self.actions_category) 
         self.num_tokens = len(self.proxy_actions_list)
         self.proxy_actions_category = self.actions_category 
         self.proxy_actions_category = []
@@ -124,7 +125,6 @@ class GFNSet(Dataset):
             
         self.pad_index = len(self.proxy_actions_list) - 2
         self.bos_index = len(self.proxy_actions_list) - 1
-        self.max_len = len(self.actions_category) + 1
         # self.embeddings = Embedding(len(self.actions_list),emb_dim,self.actions_indexes[','][0])
     def __getitem__(self, index):
         state = self.actions[index]
