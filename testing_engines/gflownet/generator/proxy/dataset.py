@@ -27,7 +27,7 @@ class ProxySet(Dataset):
             self.data = self.actions[int(len(self.actions) * 0.8):]
             self.target = self.rewards[int(len(self.actions) * 0.8):]
 
-        self.max_len = len(self.actions[0]) + 1
+        self.max_len = len(self.actions[0])
         self.actions_list = sorted(list(actions_set))
         self.actions_to_index = {self.actions_list[i]: i for i in range(len(self.actions_list))}
         self.actions_category = []
@@ -64,7 +64,7 @@ class ProxySet(Dataset):
         self.actions_indexes['.'] = [len(self.actions_list) - 1, len(self.actions_list)]  # bos_index and eos_index(.)
         self.pad_index = len(self.actions_list) - 2
         self.bos_index = len(self.actions_list) - 1
-        self.max_len = len(self.actions_category)
+        # self.max_len = len(self.actions_category)
         self.num_tokens = len(self.actions_list)
         # self.embeddings = Embedding(len(self.actions_list),emb_dim,self.actions_indexes[','][0])
 
