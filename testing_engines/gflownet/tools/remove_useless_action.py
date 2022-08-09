@@ -24,7 +24,7 @@ if __name__ == '__main__':
     sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
     for session in sessions:
         print("Current session {}".format(session))
-        space_path = "../generator/data/space_for_{}.json".format(session)
+        space_path = "../generator/data/action_space/space_for_{}.json".format(session)
         with open(space_path) as file:
             action_space = json.load(file)
         remove_action_type = []
@@ -32,7 +32,7 @@ if __name__ == '__main__':
             if len(value) == 1:
                 remove_action_type.append(key)
 
-        action_set_path = "../generator/data/a_testset_for_{}.json".format(session)
+        action_set_path = "../generator/data/testset/a_testset_for_{}.json".format(session)
         with open(action_set_path) as file:
             action_sequences = json.load(file)
         for action_seq in action_sequences:

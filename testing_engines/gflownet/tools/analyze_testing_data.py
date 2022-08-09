@@ -1,3 +1,4 @@
+import csv
 import json
 import math
 import os
@@ -8,7 +9,7 @@ from testing_engines.gflownet.lib.monitor import Monitor
 """compute the total covered specs in all sessions, and compute their difficulty value.
 """
 
-def compute_difficulty():
+def compute_difficulty_bk():
 
     with open("/home/xdzhang/work/shortgun/testing_engines/gflownet/rawdata/specs/spec_data.json") as file:
         specs = json.load(file)
@@ -57,7 +58,106 @@ def compute_difficulty():
     with open(belong_to + 'total_data_difficulty.json', 'w', encoding='utf-8') as f:
         json.dump(total_data, f, ensure_ascii=False, indent=4)
 
-def compute_coverage(belong_to, data_path, sessions):
+def compute_difficulty_single_session(belong_to, data_path_form, session, case_num):
+    with open("/home/xdzhang/work/shortgun/testing_engines/gflownet/rawdata/specs/spec_data.json") as file:
+        specs = json.load(file)
+    del specs["all_rules"]
+    all_specs = list(specs.values())
+    violation_times = dict()
+    covered_specs = []
+    increase_table = dict()
+    increase_table[0] = 0
+    index = 1
+    print("Start analyzing session {}".format(session))
+    data_dir = data_path_form.format(session)
+    for root, _, data_files in os.walk(data_dir):
+        for data_file in data_files:
+            if not data_file.endswith('.json'):
+                continue
+            with open(os.path.join(root, data_file)) as f:
+                data = json.load(f)
+                monitor = Monitor(data, 0)
+                for spec in all_specs:
+                    rub_spec = monitor.continuous_monitor2(spec)
+                    if rub_spec >= 0:
+                        if spec not in covered_specs:
+                            covered_specs.append(spec)
+                        if spec in violation_times.keys():
+                            violation_times[spec] += 1
+                        else:
+                            violation_times[spec] = 1
+            increase_table[index] = len(covered_specs)
+            index += 1
+
+    result = []
+    for key, value in violation_times.items():
+        difficulty = 1/value
+        result.append([key, belong_to, difficulty])
+    save_path = "difficulty/{}_{}.json".format(belong_to, session)
+    with open(save_path, 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=4)
+    increase_data = []
+    for key, value in increase_table.items():
+        increase_data.append([belong_to, key, value])
+    original_len = len(increase_data)
+    if original_len < 512:
+        for _ in range(512 - original_len):
+            last = increase_data[-1]
+            increase_data.append([last[0], last[1]+1, last[2]])
+
+    return covered_specs, result, increase_data
+
+
+def compute_difficulty(version):
+    my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1',
+                   'T-Junction01']
+
+    difficulty_plot_path = 'plot_data/{}/difficulty_plot_data.csv'.format(version)
+    with open(difficulty_plot_path, 'w') as f:
+        csv_write = csv.writer(f)
+        head = ['spec', 'Methods', 'Difficulty Degree', 'Newly Discovered', 'Session']
+        csv_write.writerow(head)
+
+    increase_path = 'plot_data/{}/increase_plot_data.csv'.format(version)
+    with open(increase_path, 'w') as f:
+        csv_write = csv.writer(f)
+        head = ['Methods', '#Testing Scenarios', '#Violation Constraints', 'Session']
+        csv_write.writerow(head)
+
+    for i in range(4):
+        belong_to = 'shortgun'
+        # data_path_form = '/data/xdzhang/apollo7/shortgun-8.5/{}/data'
+        data_path_form = '/data/xdzhang/apollo6/shortgun-8-7/{}/data'
+        session = my_sessions[i]
+        shortgun_set, my_reuslt, my_increase_data = compute_difficulty_single_session(belong_to, data_path_form, session, 512)
+
+        belong_to = 'lawbreaker'
+        # data_path_form = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
+        data_path_form = "/data/xdzhang/apollo6/lawbreaker/{}/data"
+        session = lb_sessions[i]
+        lb_set, lb_reuslt, lb_increase_data = compute_difficulty_single_session(belong_to, data_path_form, session, 400)
+
+        my_reuslt.extend(lb_reuslt)
+        for item in my_reuslt:
+            if item[0] in shortgun_set and item[0] not in lb_set:
+                item.append('Yes')
+            else:
+                item.append('No')
+            item.append(my_sessions[i])
+
+        with open(difficulty_plot_path, 'a+') as f:
+            csv_write = csv.writer(f)
+            csv_write.writerows(my_reuslt)
+
+        my_increase_data.extend(lb_increase_data)
+        for item in my_increase_data:
+            item.append(my_sessions[i])
+        with open(increase_path, 'a+') as f:
+            csv_write = csv.writer(f)
+            csv_write.writerows(my_increase_data)
+
+def compute_coverage(apollo_version, belong_to, data_path, sessions):
     with open("/home/xdzhang/work/shortgun/testing_engines/gflownet/rawdata/specs/spec_data.json") as file:
         specs = json.load(file)
     del specs["all_rules"]
@@ -86,20 +186,53 @@ def compute_coverage(belong_to, data_path, sessions):
                             covered_specs.append(spec)
         total_data_cover_by_session[session] = covered_specs
         print("Session {}, covered_num: {}, covered_specs: {}".format(session, covered_num, covered_specs))
-    with open(belong_to + 'total_data_cover_by_session_tj.json', 'w', encoding='utf-8') as f:
+    path = "{}/{}total_data_cover_by_session_tj.json".format(apollo_version, belong_to)
+    with open(path, 'w', encoding='utf-8') as f:
         json.dump(total_data_cover_by_session, f, ensure_ascii=False, indent=4)
 
+def verify_one(path, spec):
+    with open(path) as f:
+        data = json.load(f)
+        monitor = Monitor(data, 0)
+        rub_spec = monitor.continuous_monitor2(spec)
+        if rub_spec >= 0:
+            return True
+        return False
 
-if __name__ == "__main__":
+def verify_in_which_file(data_dir, spec):
+    for root, _, data_files in os.walk(data_dir):
+        for data_file in data_files:
+            if not data_file.endswith('.json'):
+                continue
+            with open(os.path.join(root, data_file)) as f:
+                data = json.load(f)
+                monitor = Monitor(data, 0)
+                rub_spec = monitor.continuous_monitor2(spec)
+                if rub_spec >= 0:
+                    print(os.path.join(root, data_file))
+
+
+def coverage():
+    # my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    # # ################################### apollo7
+    # apollo7_data_path_my = '/data/xdzhang/apollo7/shortgun-8.4/{}/data'
+    # compute_coverage("apollo7", "my_", apollo7_data_path_my, my_sessions)
+    #
+    # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1', 'T-Junction01']
+    # # lb_sessions = ['T-Junction01']
+    # apollo7_data_path_lb = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
+    # compute_coverage("apollo7", "lawbreaker_", apollo7_data_path_lb, lb_sessions)
+    #
+    # # ################################### apollo6
     # my_sessions = ['double_direction', 'lane_change', 'single_direction']
-    my_sessions = ['t_junction']
-    apollo7_data_path_my = '/data/xdzhang/apollo7/shortgun/{}/data'
-    # data_path = "/data/DATA-For-Traffic-Laws/T-Junction-Apollo6.0/{}/data"
     # apollo6_data_path_my = "/data/xdzhang/apollo6/64*3-active-lack_t_junction/{}/data"
-    compute_coverage("my_", apollo7_data_path_my, my_sessions)
+    # compute_coverage("apollo6", "my_", apollo6_data_path_my, my_sessions)
 
     # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1']
     lb_sessions = ['T-Junction01']
-    apollo7_data_path_lb = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
-    # apollo6_data_path_lb = "/data/xdzhang/apollo6/lawbreaker/{}/data"
-    compute_coverage("lawbreaker_", apollo7_data_path_lb, lb_sessions)
+    apollo6_data_path_lb = "/data/xdzhang/apollo6/lawbreaker/{}/data"
+    compute_coverage("apollo6", "lawbreaker_", apollo6_data_path_lb, lb_sessions)
+
+if __name__ == "__main__":
+    # coverage()
+    compute_difficulty("apollo6")

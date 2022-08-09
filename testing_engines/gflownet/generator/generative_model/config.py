@@ -20,7 +20,7 @@ args = AttrDict(
     # hidden neuron数量,越大越好
     "n_hid":256,
     # n_train_steps 训练本身epoch数量,越大越好
-    "n_train_steps":2000,
+    "n_train_steps":1000,
     # generated_number 生成的数量需要乘以batch_size,才是真正生成的数量
     "generated_number": 1,
 }

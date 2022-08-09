@@ -154,7 +154,7 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
     # just testing half of the batch.
-    for item in testcases[1:65]:
+    for item in testcases[1:]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
@@ -304,7 +304,7 @@ covered_specs_7_31 = [
 if __name__ == "__main__":
     start = datetime.now()
     # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    sessions = ['single_direction', 'lane_change', 't_junction']
+    sessions = ['t_junction']
     # all_specs and specs_to_index have the same ordering for each spec
     all_specs, specs_to_index = load_specifications()
     total_specs_num = len(all_specs)

@@ -1,79 +1,58 @@
 import json
+import math
 import os
 
 from testing_engines.gflownet.path_config import path_args
 
+DECIMAL = 1
 
-def return_weather_level(value):
-    level = 0
-    interval_num = 5
-    scale = 1.0 / interval_num
-    for i in range(5):
-        if value - scale > 0:
-            value -= scale
-            level += 1
+def my_round(value, level):
+    if level == 0:
+        return round(value, 0)
+    elif level == 1:
+        if value == 0.0:
+            return 0.0
+        decimal, integer = math.modf(value)
+        if decimal >= 0.0 and decimal < 0.25:
+            decimal = 0.0
+        elif decimal >= 0.25 and decimal < 0.7:
+            decimal = 0.5
         else:
-            break
-    return str(round((level + 0.5) * scale, 2))
+            decimal = 1.0
+        return decimal + integer
+    else:
+        assert False and "Wrong Setting."
 
-def return_offset_level(position):
-    higher_bound = 210.0
-    interval_num = 10
-    offset = position['offset']
-    assert (offset <= higher_bound)
-    scale = higher_bound / interval_num
-    level = 0
-    for i in range(5):
-        if offset - scale > 0:
-            offset -= scale
-            level += 1
-        else:
-            break
-    return position['lane'] + '+' + str((level + 0.5) * scale)
-
-def return_speed_level(value):
-    if value == 0:
-        return "0"
-    level = 0
-    interval_num = 5
-    scale = 10 / interval_num
-    for i in range(10):
-        if value - scale > 0:
-            value -= scale
-            level += 1
-        else:
-            break
-    return str(round((level + 0.5) * scale, 2))
 
 def make_env_actions(scenario, actionSeq):
     # Minute is not considered
     actionSeq.append('time+' + str(scenario['time']['hour']))
-    actionSeq.append('weather+rain+' + return_weather_level(scenario['weather']['rain']))
-    actionSeq.append('weather+wetness+' + return_weather_level(scenario['weather']['wetness']))
-    actionSeq.append('weather+fog+' + return_weather_level(scenario['weather']['fog']))
+    actionSeq.append('weather+rain+' + str(round(scenario['weather']['rain'], 1)))
+    actionSeq.append('weather+wetness+' + str(round(scenario['weather']['wetness'], 1)))
+    actionSeq.append('weather+fog+' + str(round(scenario['weather']['fog'], 1)))
 
 def make_env_actions_space(scenario, actionSpace):
     # Minute is not considered
     if 'time+' not in actionSpace:
         actionSpace['time+'] = set()
-    actionSpace['time+'].add(round(scenario['time']['hour'],1))
+    actionSpace['time+'].add(round(scenario['time']['hour'], 1))
     if 'weather+rain+' not in actionSpace:
         actionSpace['weather+rain+'] = set()
-    actionSpace['weather+rain+'].add(round(scenario['weather']['rain'],1))
+    actionSpace['weather+rain+'].add(round(scenario['weather']['rain'], 1))
     if 'weather+wetness+' not in actionSpace:
         actionSpace['weather+wetness+'] = set()
-    actionSpace['weather+wetness+'].add(round(scenario['weather']['wetness'],1))
+    actionSpace['weather+wetness+'].add(round(scenario['weather']['wetness'], 1))
     if 'weather+fog+' not in actionSpace:
         actionSpace['weather+fog+'] = set()
-    actionSpace['weather+fog+'].add(round(scenario['weather']['fog'],1))
+    actionSpace['weather+fog+'].add(round(scenario['weather']['fog'], 1))
 
 def make_ego_actions(scenario, actionSeq):
     pos = scenario['ego']['start']['lane_position']
-    actionSeq.append('ego+start+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
-    actionSeq.append('ego+start+speed+' + str(round(scenario['ego']['start']['speed'], 0)))
+    actionSeq.append('ego+start+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
+    actionSeq.append('ego+start+speed+' + str(my_round(scenario['ego']['start']['speed'], DECIMAL)))
     pos = scenario['ego']['destination']['lane_position']
-    actionSeq.append('ego+destination+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
-    actionSeq.append('ego+destination+speed+' + str(round(scenario['ego']['destination']['speed'], 0)))
+    actionSeq.append('ego+destination+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
+    actionSeq.append('ego+destination+speed+' + str(my_round(scenario['ego']['destination']['speed'], DECIMAL)))
 
 
 def make_ego_actions_space(scenario, actionSpace):
@@ -81,40 +60,40 @@ def make_ego_actions_space(scenario, actionSpace):
     type_name = 'ego+start+lane_position+' + poition['lane'] + "+"
     if type_name not in actionSpace:
         actionSpace[type_name] = set()
-    actionSpace[type_name].add(round(poition['offset'], 0))
+    actionSpace[type_name].add(my_round(poition['offset'], DECIMAL))
 
     type_name = 'ego+start+speed+'
     if type_name not in actionSpace:
         actionSpace[type_name] = set()
-    actionSpace[type_name].add(round(scenario['ego']['start']['speed'], 0))
+    actionSpace[type_name].add(my_round(scenario['ego']['start']['speed'], DECIMAL))
 
     poition = scenario['ego']['destination']['lane_position']
     type_name = 'ego+destination+lane_position+' + poition['lane'] + "+"
     if type_name not in actionSpace:
         actionSpace[type_name] = set()
-    actionSpace[type_name].add(round(poition['offset'], 0))
+    actionSpace[type_name].add(my_round(poition['offset'], DECIMAL))
 
     type_name = 'ego+destination+speed+'
     if type_name not in actionSpace:
         actionSpace[type_name] = set()
-    actionSpace[type_name].add(round(scenario['ego']['destination']['speed'], 0))
+    actionSpace[type_name].add(my_round(scenario['ego']['destination']['speed'], DECIMAL))
 
 
 def make_npc_actions(scenario, actionSeq):
     for npc in scenario['npcList']:
         npcid = npc['ID']
         pos = npc['start']['lane_position']
-        actionSeq.append(npcid + '+start+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
-        actionSeq.append(npcid + '+start+speed+' + str(round(npc['start']['speed'], 0)))
+        actionSeq.append(npcid + '+start+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
+        actionSeq.append(npcid + '+start+speed+' + str(my_round(npc['start']['speed'], DECIMAL)))
         for i, waypoint in enumerate(npc['motion']):
             pos = waypoint['lane_position']
-            actionSeq.append(npcid + '+motion+' + str(i) + '+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
-            actionSeq.append(npcid + '+motion+' + str(i) + '+speed+' + str(round(waypoint['speed'], 0)))
+            actionSeq.append(npcid + '+motion+' + str(i) + '+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
+            actionSeq.append(npcid + '+motion+' + str(i) + '+speed+' + str(my_round(waypoint['speed'], DECIMAL)))
         if npc['destination'] is None:
             continue
         pos = npc['destination']['lane_position']
-        actionSeq.append(npcid + '+destination+lane_position+' + pos['lane'] + '+' + str(round(pos['offset'], 0)))
-        actionSeq.append(npcid + '+destination+speed+' + str(round(npc['destination']['speed'], 0)))
+        actionSeq.append(npcid + '+destination+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
+        actionSeq.append(npcid + '+destination+speed+' + str(my_round(npc['destination']['speed'], DECIMAL)))
 
 def make_npc_actions_space(scenario, actionSpace):
     for npc in scenario['npcList']:
@@ -123,31 +102,31 @@ def make_npc_actions_space(scenario, actionSpace):
         type_name = npcid + '+start+lane_position+' + lp['lane'] + '+'
         if type_name not in actionSpace:
             actionSpace[type_name] = set()
-        actionSpace[type_name].add(round(lp['offset'], 0))
+        actionSpace[type_name].add(my_round(lp['offset'], DECIMAL))
         type_name = npcid + '+start+speed+'
         if type_name not in actionSpace:
             actionSpace[type_name] = set()
-        actionSpace[type_name].add(round(npc['start']['speed'], 0))
+        actionSpace[type_name].add(my_round(npc['start']['speed'], DECIMAL))
         for i, waypoint in enumerate(npc['motion']):
             type_name = npcid + '+motion+' + str(i) + '+lane_position+' + waypoint['lane_position']['lane'] + '+'
             if type_name not in actionSpace:
                 actionSpace[type_name] = set()
-            actionSpace[type_name].add(round(waypoint['lane_position']['offset'], 0))
+            actionSpace[type_name].add(my_round(waypoint['lane_position']['offset'], DECIMAL))
             type_name = npcid + '+motion+' + str(i) + '+speed+'
             if type_name not in actionSpace:
                 actionSpace[type_name] = set()
-            actionSpace[type_name].add(round(waypoint['speed'], 0))
+            actionSpace[type_name].add(my_round(waypoint['speed'], DECIMAL))
         if npc['destination'] is None:
             continue
         lp = npc['destination']['lane_position']
         type_name = npcid + '+destination+lane_position+' + lp['lane'] + '+'
         if type_name not in actionSpace:
             actionSpace[type_name] = set()
-        actionSpace[type_name].add(round(lp['offset'],0))
+        actionSpace[type_name].add(my_round(lp['offset'], DECIMAL))
         type_name = npcid + '+destination+speed+'
         if type_name not in actionSpace:
             actionSpace[type_name] = set()
-        actionSpace[type_name].add(round(npc['destination']['speed'], 0))
+        actionSpace[type_name].add(my_round(npc['destination']['speed'], DECIMAL))
 
 def make_pedestrain_actions(scenario, actionSeq):
     pass
@@ -638,16 +617,15 @@ def generate_actions_space(path):
     return action_space
 
 def gen_dataset_from_rawdata(session):
-    action_seqs = None
     raw_data_path = '../../rawdata/one_scenario/testset_for_' + session + '.json'
-    action_dataset_path = '../data/a_testset_for_' + session + '.json'
-    action_space_path = '../data/space_for_' + session + '.json'
+    action_dataset_path = '../data/testset/a_testset_for_' + session + '.json'
+    action_space_path = '../data/action_space/space_for_' + session + '.json'
 
-    # action_seqs = generate_actions(raw_data_path)
+    action_seqs = generate_actions(raw_data_path)
     action_space = generate_actions_space(raw_data_path)
     # For Debugging
-    # with open(action_dataset_path, 'w', encoding='utf-8') as f:
-    #     json.dump(action_seqs, f, ensure_ascii=False, indent=4)
+    with open(action_dataset_path, 'w', encoding='utf-8') as f:
+        json.dump(action_seqs, f, ensure_ascii=False, indent=4)
     with open(action_space_path, 'w', encoding='utf-8') as f:
         for key, value in action_space.items():
             action_space[key] = sorted(list(value))
@@ -673,8 +651,8 @@ def normalization_space(action_space):
 
 
 if __name__ == '__main__':
-    # sessions = ['single_direction', 'double_direction', 'lane_change']
-    sessions = ['t_junction']
+    sessions = ['single_direction', 'double_direction', 'lane_change', 't_junction']
+    # sessions = ['t_junction']
     for session in sessions:
         print("Handling {}".format(session))
         gen_dataset_from_rawdata(session)
