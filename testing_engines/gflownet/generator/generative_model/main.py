@@ -7,7 +7,7 @@ from testing_engines.gflownet.generator.generative_model.model import Transforme
 from testing_engines.gflownet.generator.generative_model.proxy_model import proxy
 from testing_engines.gflownet.generator.generative_model.utils import *
 from testing_engines.gflownet.generator.generative_model.dataset import GFNSet
-from testing_engines.gflownet.generator.generative_model.config import args
+from testing_engines.gflownet.generator.generative_model.gfn_config import args
 from testing_engines.gflownet.path_config import path_args
 
 

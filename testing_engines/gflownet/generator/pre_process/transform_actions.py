@@ -83,6 +83,7 @@ def make_npc_actions(scenario, actionSeq):
     for npc in scenario['npcList']:
         npcid = npc['ID']
         pos = npc['start']['lane_position']
+        actionSeq.append(npcid + '+name+' + npc['name'])
         actionSeq.append(npcid + '+start+lane_position+' + pos['lane'] + '+' + str(my_round(pos['offset'], DECIMAL)))
         actionSeq.append(npcid + '+start+speed+' + str(my_round(npc['start']['speed'], DECIMAL)))
         for i, waypoint in enumerate(npc['motion']):
@@ -98,6 +99,11 @@ def make_npc_actions(scenario, actionSeq):
 def make_npc_actions_space(scenario, actionSpace):
     for npc in scenario['npcList']:
         npcid = npc['ID']
+        type_name = npcid + '+name+'
+        if type_name not in actionSpace:
+            actionSpace[type_name] = set()
+        actionSpace[type_name].add(npc['name'])
+
         lp = npc['start']['lane_position']
         type_name = npcid + '+start+lane_position+' + lp['lane'] + '+'
         if type_name not in actionSpace:
@@ -163,7 +169,7 @@ Action Sequence --> Testable Scenario
 """
 def decode(action_sequence, session):
     template_path = path_args.template_path.format(session)
-    # template_path = "../data/template_for_{}.json".format(session)
+    # template_path = "../data/templates/template_for_{}.json".format(session)
     with open(template_path) as file:
         template = json.load(file)
         template["ScenarioName"] = action_sequence["ScenarioName"]
@@ -193,6 +199,25 @@ def decode(action_sequence, session):
             elif action.startswith("ego+destination+speed+"):
                 dest_speed = action.replace("ego+destination+speed+", "")
                 template["ego"]["destination"]["speed"] = float(dest_speed)
+            #NPC Name or Type
+            elif action.startswith("npc1+name+"):
+                name = action.replace("npc1+name+", "")
+                template["npcList"][0]["name"] = name
+            elif action.startswith("npc2+name+"):
+                name = action.replace("npc2+name+", "")
+                template["npcList"][1]["name"] = name
+            elif action.startswith("npc3+name+"):
+                name = action.replace("npc3+name+", "")
+                template["npcList"][2]["name"] = name
+            elif action.startswith("npc4+name+"):
+                name = action.replace("npc4+name+", "")
+                template["npcList"][3]["name"] = name
+            elif action.startswith("npc5+name+"):
+                name = action.replace("npc5+name+", "")
+                template["npcList"][4]["name"] = name
+            elif action.startswith("npc6+name+"):
+                name = action.replace("npc6+name+", "")
+                template["npcList"][5]["name"] = name
             # NPC1
             elif action.startswith("npc1+start+lane_position+lane_574+"):
                 npc1_start_offset = action.replace("npc1+start+lane_position+lane_574+", "")
@@ -618,8 +643,8 @@ def generate_actions_space(path):
 
 def gen_dataset_from_rawdata(session):
     raw_data_path = '../../rawdata/one_scenario/testset_for_' + session + '.json'
-    action_dataset_path = '../data/testset/a_testset_for_' + session + '.json'
-    action_space_path = '../data/action_space/space_for_' + session + '.json'
+    action_dataset_path = '../data/testset_2/a_testset_for_' + session + '.json'
+    action_space_path = '../data/action_space_2/space_for_' + session + '.json'
 
     action_seqs = generate_actions(raw_data_path)
     action_space = generate_actions_space(raw_data_path)
@@ -636,7 +661,7 @@ def gen_dataset_from_rawdata(session):
 def generate_scenarios_batch(session):
     test_cases_batch = []
     # data_path = '../data/a_testset_for_{}.json'.format(session)
-    data_path = "/home/xdzhang/work/shortgun/testing_engines/gflownet/generator/data/one_action_sequence.json"
+    data_path = "/home/xdzhang/work/shortgun/testing_engines/gflownet/generator/data/testset/a_testset_for_{}.json".format(session)
     with open(data_path) as file:
         dataset = json.load(file)
         for item in dataset:
@@ -646,14 +671,11 @@ def generate_scenarios_batch(session):
         json.dump(test_cases_batch, wf, indent=4)
     return test_cases_batch
 
-def normalization_space(action_space):
-    pass
-
 
 if __name__ == '__main__':
-    sessions = ['single_direction', 'double_direction', 'lane_change', 't_junction']
-    # sessions = ['t_junction']
+    # sessions = ['single_direction', 'double_direction', 'lane_change', 't_junction']
+    sessions = ['lane_change']
     for session in sessions:
         print("Handling {}".format(session))
-        gen_dataset_from_rawdata(session)
-        # generate_scenarios_batch(session)
+        # gen_dataset_from_rawdata(session)
+        generate_scenarios_batch(session)

@@ -1,5 +1,5 @@
 from model import TransformerModel, make_mlp
-from proxy import proxy
+from gfn_config import proxy
 from utils import *
 from dataset import GFNSet
 import tqdm

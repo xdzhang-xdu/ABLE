@@ -25,8 +25,8 @@ class GFNSet(Dataset):
             self.rewards.append(tset['robustness'][0])
             for action in tset['actions']:
                     actions_set.add(action)
-        self.proxy_max_len = len(self.actions[0]) 
-        self.max_len = len(self.actions[0]) 
+        self.proxy_max_len = len(self.actions[0])
+        self.max_len = len(self.actions[0])
         if g_flag is False:
           if train is True:
               self.data = self.actions[:int(len(self.actions)*0.8)]
