@@ -1,5 +1,4 @@
 import copy
-import math
 import os
 import shutil
 import sys
@@ -73,7 +72,7 @@ async def test_one_scenario(scenario_testcase, specs, covered_specs, reward, dir
                         if spec in covered_specs:
                             continue
                         robustness = monitor.continuous_monitor2(spec)
-                        reward[specs_to_index[spec]] = robustness
+                        print("---", spec, robustness)
                         if robustness < 0.0:
                             continue
                         covered_specs.append(spec)
@@ -141,17 +140,11 @@ def debug_new_batch(session):
 """
 For debugging single scenario
 """
-def generate_one_scenario():
-    test_cases = []
-    one_testcase = "generator/data/one_testcase.json"
-    with open(one_testcase) as file:
+def load_testcases(spec, session):
+    validate_test_path = "validate/{}_new_covered.json".format(session)
+    with open(validate_test_path) as file:
         json_obj = json.load(file)
-        if isinstance(json_obj, list):
-            test_cases.extend(json_obj)
-        else:
-            test_cases.append(json_obj)
-    return test_cases
-
+        return json_obj[spec]
 
 def load_specifications():
     with open(path_args.spec_path) as file:
@@ -162,48 +155,26 @@ def load_specifications():
         table[spec] = idx + 1
     return list(specs.values()), table
 
+def load_target_specs():
+    return ['eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))', 'eventually((direction==1)and(not(speed<=30)))', 'eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))', 'eventually(((isLaneChanging==1)and(currentLanenumber>=2))and(PriorityNPCAhead==1))', 'eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(always[0,3](not(speed>0.5))))', 'eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(NPCAheadAhead<=0.5))']
+
+
 
 def test_scenario_batch(testcases, remained_specs, file_directory):
     covered_specs = list()
-    new_dataset = []
-    # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
-    # just testing half of the batch.
-    for item in testcases[1:]:
+    for item in testcases[:]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
             asyncio.gather(asyncio.gather(
                 test_one_scenario(item, remained_specs, covered_specs, reward, directory=file_directory))))
-        item["robustness"] = reward
-        logging.info("Current covered specs: {} until the scenario {}".format(len(covered_specs), item['ScenarioName']))
-        new_dataset.append(item)
-    # remove covered specs from remained_specs
-    for cs in covered_specs:
-        remained_specs.remove(cs)
-    # print("Uncovered specs after batch {}: {}".format(batch_no, len(remain_specs)))
-    return covered_specs, new_dataset
+        if len(covered_specs) == 1:
+            break
+    return covered_specs
 
-def new_reward_function(item, specs_covered_flag):
-    reward = 0.0
-    robust = item["robustness"][1:]
-    for i in range(81):
-        if robust[i] >= 0:
-            distance = 0
-        else:
-            distance = -robust[i]
-        reward += (specs_weight[i] * specs_covered_flag[i] / (distance + 1.0))
-    return reward
-
-def max_robust_function(item, specs_covered_flag):
-    condidates = []
-    robust = item["robustness"][1:]
-    for i in range(81):
-        if specs_covered_flag[i] == 1:
-            condidates.append(robust[i])
-    return math.exp(max(condidates))
 
 def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, session):
-    specs_covered_flag = [1]*81 # 1 stands for the corresponding spec is uncovered, otherwise covered.
+    specs_covered_flag = [1]*81 # 1 stands for the corresponding spec is uncovered, otherwise.
     all_specs, _ = load_specifications()
     for item in all_specs:
         if item in remained_specs:
@@ -225,8 +196,16 @@ def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, ses
     # update reward values in the new set
     history_data.extend(batch_testdata_seq)
     for item in history_data:
-        # item["robustness"][0] = new_reward_function(item, specs_covered_flag)
-        item["robustness"][0] = max_robust_function(item, specs_covered_flag)
+        reward = 0.0
+        robust = item["robustness"][1:]
+        for i in range(81):
+            if robust[i] >= 0:
+                distance = 0
+            else:
+                distance = -robust[i]
+            reward += (specs_weight[i]*specs_covered_flag[i] / (distance + 1.0))
+        item["robustness"][0] = reward
+        # item["robustness"][0] = -max(item["robustness"][1:])
     # For debug
     dataset_path = path_args.in_process_dataset_path.format(session)
     with open(dataset_path, 'w') as wf:
@@ -235,7 +214,7 @@ def merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, ses
     return history_data
 
 
-def test_session(session, total_specs_num, remained_specs):
+def test_session(session, testcases, remained_specs):
     log_direct = path_args.test_result_direct.format(session)
     # Set testing result or data paths
     if not os.path.exists(log_direct):
@@ -251,58 +230,29 @@ def test_session(session, total_specs_num, remained_specs):
     logging.basicConfig(level=logging.INFO, handlers=[stdout_handler, file_handler],
                         format='%(asctime)s, %(levelname)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
     logging.info("Current Session: {}".format(session))
-    # Initialize Batch_0
-    history_data = get_history_scenarios(session)
-    # Active learning loop
-    covered_specs = list()
-    for b_index in range(active_learning_loop):
-        # apollo_pid = launch_apollo()
-        # time.sleep(55)
-        # print("Apollo launching success.")
-        start = datetime.now()
-        new_testcase_batch = generate_scenarios_batch(history_data, session)
-        # new_testcase_batch = generate_one_scenario()
-        # new_testcase_batch = debug_new_batch(session)
-        end = datetime.now()
-        logging.info("learning cost: {}".format(end - start))
 
-        batch_covered_specs, batch_testdata = test_scenario_batch(new_testcase_batch, remained_specs, log_direct)
-        coverage_rate = 1 - len(remained_specs) / total_specs_num
-        logging.info("Batch index: {}, generating new testcases: {}, total coverage rate: {}/{} = {}, "
-                     "new covered predicates: {}\n".format(b_index, len(new_testcase_batch),
-                                                           (total_specs_num - len(remained_specs)),
-                                                           total_specs_num, coverage_rate, batch_covered_specs))
-        covered_specs.extend(batch_covered_specs)
-        history_data = merge_newdata_into_dataset(history_data, batch_testdata, remained_specs, session)
-        # stop_apollo(apollo_pid)
-    return covered_specs
-
+    for _ in range(100):
+        covered_specs = test_scenario_batch(testcases, remained_specs, log_direct)
+        if len(covered_specs) != 0:
+            print("Repay is successful.")
+            break
+        else:
+            print("Continue....")
 
 """
 " specs formula -> the index in the json file
 """
 specs_to_index = dict()
 specs_weight = [1]*81
-active_learning_loop = 4
+active_learning_loop = 1
 
 
 if __name__ == "__main__":
     start = datetime.now()
-    # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    sessions = ['t_junction']
-    # all_specs and specs_to_index have the same ordering for each spec
-    all_specs, specs_to_index = load_specifications()
-    total_specs_num = len(all_specs)
-    all_covered_specs = list()
-    for session in sessions:
-        remind_specs = copy.deepcopy(all_specs)
-        session_covered_specs = test_session(session, total_specs_num, remind_specs)
-        all_covered_specs.extend(session_covered_specs)
-        logging.info("Session: {}, total coverage rate: {}/{} = {}, new covered predicates: {}\n".format(session,
-           len(all_covered_specs), total_specs_num, len(all_covered_specs) / total_specs_num, session_covered_specs))
-    #
-    end = datetime.now()
-    result_info = "Finished, total coverage rate: {}/{} = {}, total time cost: {}, the covered predicates: {}\n".format(
-        len(all_covered_specs), total_specs_num, len(all_covered_specs)/total_specs_num, (end - start), all_covered_specs)
-    logging.info(result_info)
-    print(result_info)
+    sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
+    # sessions = ['lane_change']
+    session = 'lane_change'
+    target_spec = 'eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))'
+    new_testcases = load_testcases(target_spec, session)
+    print(len(new_testcases), new_testcases)
+    test_session(session, new_testcases, [target_spec])
