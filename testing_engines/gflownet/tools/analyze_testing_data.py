@@ -58,7 +58,7 @@ def compute_difficulty_bk():
     with open(belong_to + 'total_data_difficulty.json', 'w', encoding='utf-8') as f:
         json.dump(total_data, f, ensure_ascii=False, indent=4)
 
-def compute_difficulty_single_session(belong_to, data_path_form, session, case_num):
+def compute_difficulty_single_session(belong_to, data_path_form, session):
     with open("/home/xdzhang/work/shortgun/testing_engines/gflownet/rawdata/specs/spec_data.json") as file:
         specs = json.load(file)
     del specs["all_rules"]
@@ -110,8 +110,9 @@ def compute_difficulty_single_session(belong_to, data_path_form, session, case_n
 
 def compute_difficulty(version):
     my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
-    lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1',
-                   'T-Junction01']
+    # my_sessions = ['double_direction']
+    lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1', 'T-Junction01']
+    # lb_sessions = ['Intersection_with_Double-Direction_Roads']
 
     difficulty_plot_path = 'plot_data/{}/difficulty_plot_data.csv'.format(version)
     with open(difficulty_plot_path, 'w') as f:
@@ -125,18 +126,22 @@ def compute_difficulty(version):
         head = ['Methods', '#Testing Scenarios', '#Violation Constraints', 'Session']
         csv_write.writerow(head)
 
+    my_data_path_form = ''
+    lb_data_path_form = ''
+    if version == "apollo7":
+        my_data_path_form = '/data/xdzhang/apollo7/best/{}/data'
+        lb_data_path_form = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
+    if version == "apollo6":
+        my_data_path_form = '/data/xdzhang/apollo6/shortgun-8-7/{}/data'
+        lb_data_path_form = "/data/xdzhang/apollo6/lawbreaker/{}/data"
     for i in range(4):
         belong_to = 'shortgun'
-        # data_path_form = '/data/xdzhang/apollo7/shortgun-8.5/{}/data'
-        data_path_form = '/data/xdzhang/apollo6/shortgun-8-7/{}/data'
         session = my_sessions[i]
-        shortgun_set, my_reuslt, my_increase_data = compute_difficulty_single_session(belong_to, data_path_form, session, 512)
+        shortgun_set, my_reuslt, my_increase_data = compute_difficulty_single_session(belong_to, my_data_path_form, session)
 
         belong_to = 'lawbreaker'
-        # data_path_form = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
-        data_path_form = "/data/xdzhang/apollo6/lawbreaker/{}/data"
         session = lb_sessions[i]
-        lb_set, lb_reuslt, lb_increase_data = compute_difficulty_single_session(belong_to, data_path_form, session, 400)
+        lb_set, lb_reuslt, lb_increase_data = compute_difficulty_single_session(belong_to, lb_data_path_form, session)
 
         my_reuslt.extend(lb_reuslt)
         for item in my_reuslt:
@@ -186,7 +191,7 @@ def compute_coverage(apollo_version, belong_to, data_path, sessions):
                             covered_specs.append(spec)
         total_data_cover_by_session[session] = covered_specs
         print("Session {}, covered_num: {}, covered_specs: {}".format(session, covered_num, covered_specs))
-    path = "{}/{}total_data_cover_by_session_tj.json".format(apollo_version, belong_to)
+    path = "{}/{}coverage_as_session.json".format(apollo_version, belong_to)
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(total_data_cover_by_session, f, ensure_ascii=False, indent=4)
 
@@ -200,6 +205,7 @@ def verify_one(path, spec):
         return False
 
 def verify_in_which_file(data_dir, spec):
+    result = []
     for root, _, data_files in os.walk(data_dir):
         for data_file in data_files:
             if not data_file.endswith('.json'):
@@ -210,29 +216,84 @@ def verify_in_which_file(data_dir, spec):
                 rub_spec = monitor.continuous_monitor2(spec)
                 if rub_spec >= 0:
                     print(os.path.join(root, data_file))
+                    result.append(os.path.join(root, data_file))
+    return result
 
+def compute_robustness():
+    specs = ['eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))',
+             'eventually(((direction==2)and(PriorityPedsAhead==1))and(always[0,2](not(speed<0.5))))',
+             'eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))',
+             'eventually(((direction==1)and(PriorityPedsAhead==1))and(always[0,2](not(speed<0.5))))']
+    path = "/data/xdzhang/apollo7/best/lane_change/data/result17-08-2022-18-32-48.json"
+    for spec in specs:
+        with open(path) as f:
+            data = json.load(f)
+            monitor = Monitor(data, 0)
+            rub_spec = monitor.continuous_monitor2(spec)
+            print(spec, rub_spec)
 
 def coverage():
-    # my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
-    # # ################################### apollo7
-    # apollo7_data_path_my = '/data/xdzhang/apollo7/shortgun-8.4/{}/data'
-    # compute_coverage("apollo7", "my_", apollo7_data_path_my, my_sessions)
-    #
+    my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    # ################################### apollo7
+    apollo7_data_path_my = '/data/xdzhang/apollo7/active+max/{}/data'
+    compute_coverage("apollo7", "my_active+max_", apollo7_data_path_my, my_sessions)
+
     # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1', 'T-Junction01']
     # # lb_sessions = ['T-Junction01']
     # apollo7_data_path_lb = "/data/xdzhang/apollo7/lawbreaker-8-2/{}/data"
     # compute_coverage("apollo7", "lawbreaker_", apollo7_data_path_lb, lb_sessions)
-    #
-    # # ################################### apollo6
-    # my_sessions = ['double_direction', 'lane_change', 'single_direction']
-    # apollo6_data_path_my = "/data/xdzhang/apollo6/64*3-active-lack_t_junction/{}/data"
-    # compute_coverage("apollo6", "my_", apollo6_data_path_my, my_sessions)
 
-    # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1']
-    lb_sessions = ['T-Junction01']
-    apollo6_data_path_lb = "/data/xdzhang/apollo6/lawbreaker/{}/data"
-    compute_coverage("apollo6", "lawbreaker_", apollo6_data_path_lb, lb_sessions)
+    # ################################### apollo6
+    # my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    # apollo6_data_path_my = "/data/xdzhang/apollo6/shortgun-8-7/{}/data"
+    # compute_coverage("apollo6", "my_", apollo6_data_path_my, my_sessions)
+    #
+    # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1', 'T-Junction01']
+    # # lb_sessions = ['T-Junction01']
+    # apollo6_data_path_lb = "/data/xdzhang/apollo6/lawbreaker/{}/data"
+    # compute_coverage("apollo6", "lawbreaker_", apollo6_data_path_lb, lb_sessions)
+
+def get_validate_cases(session, specs):
+    data_path_form = "/data/xdzhang/apollo7/best/{}/data".format(session)
+    scene = dict()
+    for s in specs:
+        print(s)
+        files = verify_in_which_file(data_path_form, s)
+        one_spec_to_sces = []
+        for file in files:
+            with open(file) as f:
+                data = json.load(f)
+                del data["groundTruthPerception"]
+                del data["testFailures"]
+                del data["testResult"]
+                del data["minEgoObsDist"]
+                del data["destinationReached"]
+                del data["trace"]
+                del data["completed"]
+                one_spec_to_sces.append(data)
+        scene[s] = one_spec_to_sces
+        print("--------------")
+    validate_test_path = "../validate/{}_new_covered.json".format(session)
+    with open(validate_test_path, 'w', encoding='utf-8') as f:
+        json.dump(scene, f, ensure_ascii=False, indent=4)
+
+def validate():
+    my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    spec_table = dict()
+    specs_double_direction = ['eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(lowBeamOn==1)))', 'eventually(((((trafficLightAheadcolor==3)and(direction==1))and(Time<=20.0))and(Time>=7.0))and(not(turnSignal==1)))', 'eventually((isOverTaking==1)and(always[0,10]((isLaneChanging==1)and(not(NearestNPCAhead<=5.0)))))', 'eventually((direction==1)and(not(turnSignal==1)))', 'eventually(((isLaneChanging==1)and(currentLanenumber>=2))and(PriorityNPCAhead==1))', 'eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(always[0,3](not(speed>0.5))))', 'eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(turnSignal==1)))']
+    specs_single_direction = ['eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time<=7.0))and(not(lowBeamOn==1)))', 'eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(lowBeamOn==1)))', 'eventually(((((trafficLightAheadcolor==3)and(direction==1))and(Time<=20.0))and(Time>=7.0))and(not(turnSignal==1)))', 'eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time<=7.0))and(not(turnSignal==1)))', 'eventually((direction==1)and(not(turnSignal==1)))', 'eventually((direction==2)and(not(turnSignal==2)))', 'eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))', 'eventually((((signalAhead==0)and(PriorityNPCAhead==1))and(junctionAhead<=1.0))and(always[0,2](not(speed<0.5))))', 'eventually((((trafficLightAheadcolor==3)and(direction==1))and(Time>=20.0))and(not(turnSignal==1)))']
+    specs_lane_change = ['eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))', 'eventually((direction==1)and(not(speed<=30)))', 'eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))', 'eventually(((isLaneChanging==1)and(currentLanenumber>=2))and(PriorityNPCAhead==1))', 'eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(always[0,3](not(speed>0.5))))', 'eventually(((trafficLightAheadcolor==3)and((eventually[0,2](NPCAheadspeed>0.5))and(NPCAheadAhead<=8.0)))and(NPCAheadAhead<=0.5))']
+    specs_t_junction = ['eventually((direction==1)and(not(turnSignal==1)))', 'eventually(((((trafficLightAheadcolor==3)and(direction==1))and(Time<=20.0))and(Time>=7.0))and(not(turnSignal==1)))', 'eventually((direction==2)and(not(turnSignal==2)))', 'eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))']
+    spec_table['double_direction'] = specs_double_direction
+    spec_table['lane_change'] = specs_lane_change
+    spec_table['single_direction'] = specs_single_direction
+    spec_table['t_junction'] = specs_t_junction
+    for session in my_sessions:
+        print(session, "==========================================================")
+        get_validate_cases(session, spec_table[session])
 
 if __name__ == "__main__":
-    # coverage()
-    compute_difficulty("apollo6")
+    coverage()
+    # compute_difficulty("apollo7")
+    # validate()
+    # compute_robustness()

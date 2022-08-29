@@ -32,7 +32,7 @@ if __name__ == '__main__':
             if len(value) == 1:
                 remove_action_type.append(key)
 
-        action_set_path = "../generator/data/testset/a_testset_for_{}.json".format(session)
+        action_set_path = "../generator/data/testset_2/a_testset_for_{}.json".format(session)
         with open(action_set_path) as file:
             action_sequences = json.load(file)
         for action_seq in action_sequences:
@@ -42,6 +42,6 @@ if __name__ == '__main__':
                         action_seq["actions"].remove(action)
                         print("delete {}".format(action))
 
-        action_set_path = "../generator/data/a_testset_for_{}_remove.json".format(session)
+        action_set_path = "../generator/data/testset_2/a_testset_for_{}_remove.json".format(session)
         with open(action_set_path, 'w', encoding='utf-8') as f:
             json.dump(action_sequences, f, indent=4)
