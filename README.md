@@ -1,13 +1,8 @@
 # Prerequisites
 1. A computer powerful enogh for running Apollo+LGSVL. 
 (Or two computers: one for Apollo, one for LGSVL)
-2. rtamt
+2. rtamt (for evaluating robustness degree of a STL)
 3. python3
-
-## Install antlr4 for ABLE
-Make sure installation of version antlr-4.8(the latest version is not supported):
-[Install By Package](https://www.antlr.org/download/antlr-4.8-complete.jar)
-
 
 ## Install RTAMT for ABLE
 Please refer to [the github page](https://github.com/nickovic/rtamt) for installation of RTAMT.
