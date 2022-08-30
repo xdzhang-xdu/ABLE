@@ -7,7 +7,7 @@ evn = Environment(time, weather);
 car_model = "gt_sensors";
 ego_init_position ="lane_623"->50;
 ego_init_state = (ego_init_position);
-ego_target_position = "lane_146"->100;
+ego_target_position = "lane_145"->50;
 ego_target_state = (ego_target_position);
 vehicle_type = (car_model);
 ego_vehicle = AV(ego_init_state, ego_target_state, vehicle_type);
@@ -47,20 +47,17 @@ scenario0 = CreateScenario{load(map_name);
 
 
 Trace trace = EXE(scenario0);
-//law44
-statement1 = currentLane.number >= 2;
-statement2 = (speed >= speedLimit.lowerLimit) & (speed <= speedLimit.upperLimit);
-statement3 = isLaneChanging & currentLane.number >= 2;
-statement4 = G(statement1 -> statement2);
-statement5 = G(statement3 -> ~PriorityNPCAhead);
-law44 = statement4 & statement5;
+ego_state= trace[ego];
+npc1_truth= trace[truth][npc1];
+npc2_truth = trace[truth][npc2];
+npc3_truth =  trace[truth][npc3];
+npc4_truth =  trace[truth][npc4];
 
-//law46
-law_46_sub2 = G( (direction == left | direction == right | isTurningAround) -> (speed <= 30 ));
-law_46_sub3 = G( (rain >= 0.5 | fog >= 0.5 | snow >=0.5 | visibility <= 50 ) -> (speed <= 30));
-law46 = (law_46_sub2) & (law_46_sub3);
+dis1 = dis(ego_state, npc1_truth);
+dis2 = dis(ego_state, npc2_truth);
+dis3 = dis(ego_state, npc3_truth);
+dis4 = dis(ego_state, npc4_truth);
 
-trace |= law44 & law46;
-
-
+// assertion 0
+trace |= (G (dis1>=0.5 & dis2>=0.5 & dis3>=0.5 &dis4>=0.5)) & (F (dis(ego_state, ego_target_position)<=2.0));
 
