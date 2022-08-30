@@ -204,7 +204,7 @@ def verify_one(path, spec):
             return True
         return False
 
-def verify_in_which_file(data_dir, spec):
+def verify_in_which_files(data_dir, spec):
     result = []
     for root, _, data_files in os.walk(data_dir):
         for data_file in data_files:
@@ -219,6 +219,21 @@ def verify_in_which_file(data_dir, spec):
                     result.append(os.path.join(root, data_file))
     return result
 
+def verify_in_which_file(data_dir, spec):
+    file = ''
+    for root, _, data_files in os.walk(data_dir):
+        for data_file in data_files:
+            if not data_file.endswith('.json'):
+                continue
+            with open(os.path.join(root, data_file)) as f:
+                data = json.load(f)
+                monitor = Monitor(data, 0)
+                rub_spec = monitor.continuous_monitor2(spec)
+                if rub_spec >= 0:
+                    print(os.path.join(root, data_file))
+                    file = os.path.join(root, data_file)
+                    break
+    return file
 def compute_robustness():
     specs = ['eventually(((direction==2)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))',
              'eventually(((direction==2)and(PriorityPedsAhead==1))and(always[0,2](not(speed<0.5))))',
@@ -258,7 +273,7 @@ def get_validate_cases(session, specs):
     scene = dict()
     for s in specs:
         print(s)
-        files = verify_in_which_file(data_path_form, s)
+        files = verify_in_which_files(data_path_form, s)
         one_spec_to_sces = []
         for file in files:
             with open(file) as f:
