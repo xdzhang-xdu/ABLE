@@ -29,7 +29,6 @@ async def test_one_scenario(scenario_testcase, specs, covered_specs, reward, dir
         while True:
             msg = await websocket.recv()
             msg = json.loads(msg)
-            # print(msg['TYPE'])
             if msg['TYPE'] == 'READY_FOR_NEW_TEST':
                 if msg['DATA']:
                     logging.info('Running Scenario: {}'.format(scenario_testcase["ScenarioName"]))
