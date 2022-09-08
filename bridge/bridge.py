@@ -573,6 +573,7 @@ class Server:
                     self.process_with_data_apollo_part(data_to_process)
             else:
                 print('The result is not cleared!')
+                self.result = {}
 
             if self.result.__contains__('trace'):
                 response['TYPE'] = 'TEST_COMPLETED'
@@ -622,10 +623,27 @@ class Server:
         #         response['DATA'] = self.result
 
             # print('Receive data_to_process:' + str(data_to_process))
+        elif msg['CMD'] == 'RESTART_MODULE':
+            self.restart_module(msg['Module'])
+            response['TYPE'] = 'RESTART_MODULE_FINISHED'
+            response['DATA'] = None
+            try:
+                await websocket.send(json.dumps(response))
+            except websocket.exceptions as e:  # fail
+                response['TYPE'] = 'ERROR'
+                response['DATA'] = None
+                await websocket.send(json.dumps(response))
         else:
-            print('Request Invaild! Bridge Deny the request from Client !')
+            print('Request Invaild! Bridge Deny the request from Client!')
 
         # await websocket.send(json.dumps(response))
+
+    def restart_module(self, module):
+        dv = lgsvl.dreamview.Connection(self.sim, self.ego, self.BRIDGE_HOST)
+        dv.disable_module(module)
+        dv.enable_module(module)
+        return
+
 
 def main():
     ws = Server()
