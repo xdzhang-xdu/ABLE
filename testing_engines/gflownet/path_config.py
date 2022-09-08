@@ -6,6 +6,7 @@ path_args = AttrDict(
     {
         # testing result data
         "test_result_direct": "/data/xdzhang/apollo7/active+max/{}",
+        "debug_result_direct": "/data/xdzhang/apollo7/debug/{}",
         "spec_path": "rawdata/specs/spec_data.json",
         # data for training
         "train_data_path": "generator/data/testset/a_testset_for_{}.json",
