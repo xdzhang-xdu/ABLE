@@ -27,7 +27,7 @@ def get_index(spec):
                 return key
 
 def findoutTraces(version, session, specs):
-    path = '/data/xdzhang/{}/best/{}/data'.format(version, session)
+    path = '/data/xdzhang/{}/shortgun-no-active/{}/data'.format(version, session)
     for spec in specs:
         print(spec)
         file = verify_in_which_file(path, spec)
@@ -35,16 +35,24 @@ def findoutTraces(version, session, specs):
             data = json.load(f)
         print("--------------")
         sub_law = get_index(spec)
-        trace_path = "../../../ICSE2023_experimental_data/{}/{}".format(version, session)
+        trace_path = "../../../ICSE2023_experimental_data/inactive+new/{}/{}".format(version, session)
         if not os.path.exists(trace_path):
             os.makedirs(trace_path)
-        trace_file_name = "../../../ICSE2023_experimental_data/{}/{}/{}.json".format(version, session, sub_law)
+        trace_file_name = "../../../ICSE2023_experimental_data/inactive+new/{}/{}/{}.json".format(version, session, sub_law)
         with open(trace_file_name, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
-    version = 'apollo7'
+    my_sessions = ['double_direction', 'lane_change', 'single_direction', 't_junction']
+    path_my = "coverage/apollo7/my_inactive+new_coverage_as_session.json"
+    with open(path_my) as f:
+        data_my = json.load(f)
+    for session in my_sessions:
+        findoutTraces('apollo7', session, set(data_my[session]))
+
+def run():
+    version = 'apollo6'
     path_lb = "coverage/{}/lawbreaker_coverage_as_session.json".format(version)
     path_my = "coverage/{}/my_coverage_as_session.json".format(version)
     print("compare between {} and {}".format(path_my, path_lb))
@@ -58,7 +66,7 @@ if __name__ == "__main__":
     print("ABLE: {}".format(len(data_my["double_direction"])))
     print("lawbreaker: {}".format(len(data_lb["Intersection_with_Double-Direction_Roads"])))
     delta = set(data_my["double_direction"]).difference(set(data_lb["Intersection_with_Double-Direction_Roads"]))
-    findoutTraces(version, "double_direction", delta)
+    findoutTraces(version, "double_direction", set(data_lb["Intersection_with_Double-Direction_Roads"]))
     print(len(delta), delta)
     print_index(delta)
     print("exist in lawbreaker but not in mine:")
@@ -72,7 +80,7 @@ if __name__ == "__main__":
     print("ABLE: {}".format(len(data_my["single_direction"])))
     print("lawbreaker: {}".format(len(data_lb["Single-Direction-1"])))
     delta = set(data_my["single_direction"]).difference(set(data_lb["Single-Direction-1"]))
-    findoutTraces(version, "single_direction", delta)
+    findoutTraces(version, "single_direction", set(data_lb["Single-Direction-1"]))
     print(len(delta), delta)
     print_index(delta)
     print("exist in lawbreaker but not in mine:")
@@ -86,7 +94,7 @@ if __name__ == "__main__":
     print("ABLE: {}".format(len(data_my["lane_change"])))
     print("lawbreaker: {}".format(len(data_lb["lane_change_in_the_same_road"])))
     delta = set(data_my["lane_change"]).difference(set(data_lb["lane_change_in_the_same_road"]))
-    findoutTraces(version, "lane_change", delta)
+    findoutTraces(version, "lane_change", set(data_lb["lane_change_in_the_same_road"]))
     print(len(delta), delta)
     print_index(delta)
     print("exist in lawbreaker but not in mine:")
@@ -101,7 +109,7 @@ if __name__ == "__main__":
     print("ABLE: {}".format(len(data_my["t_junction"])))
     print("lawbreaker: {}".format(len(data_lb["T-Junction01"])))
     delta = set(data_my["t_junction"]).difference(set(data_lb["T-Junction01"]))
-    findoutTraces(version, "t_junction", delta)
+    findoutTraces(version, "t_junction", set(data_lb["T-Junction01"]))
     print(len(delta), delta)
     print_index(delta)
     print("exist in lawbreaker but not in mine:")

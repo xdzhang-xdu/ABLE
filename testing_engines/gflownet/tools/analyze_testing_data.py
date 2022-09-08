@@ -163,7 +163,7 @@ def compute_difficulty(version):
             csv_write.writerows(my_increase_data)
 
 def compute_coverage(apollo_version, belong_to, data_path, sessions):
-    with open("/home/xdzhang/work/shortgun/testing_engines/gflownet/rawdata/specs/spec_data.json") as file:
+    with open("../../../Specification/violation_formulae.json") as file:
         specs = json.load(file)
     del specs["all_rules"]
     #
@@ -191,7 +191,7 @@ def compute_coverage(apollo_version, belong_to, data_path, sessions):
                             covered_specs.append(spec)
         total_data_cover_by_session[session] = covered_specs
         print("Session {}, covered_num: {}, covered_specs: {}".format(session, covered_num, covered_specs))
-    path = "{}/{}coverage_as_session.json".format(apollo_version, belong_to)
+    path = "coverage/{}/{}coverage_as_session.json".format(apollo_version, belong_to)
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(total_data_cover_by_session, f, ensure_ascii=False, indent=4)
 
@@ -252,6 +252,9 @@ def coverage():
     # ################################### apollo7
     apollo7_data_path_my = '/data/xdzhang/apollo7/active+max/{}/data'
     compute_coverage("apollo7", "my_active+max_", apollo7_data_path_my, my_sessions)
+
+    apollo7_data_path_my = '/data/xdzhang/apollo7/shortgun-no-active/{}/data'
+    compute_coverage("apollo7", "my_inactive+new_", apollo7_data_path_my, my_sessions)
 
     # lb_sessions = ['Intersection_with_Double-Direction_Roads', 'lane_change_in_the_same_road', 'Single-Direction-1', 'T-Junction01']
     # # lb_sessions = ['T-Junction01']
