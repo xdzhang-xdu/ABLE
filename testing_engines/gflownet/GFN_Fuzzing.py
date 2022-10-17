@@ -14,7 +14,6 @@ from testing_engines.gflownet.generator.proxy.proxy_config import proxy_args
 from testing_engines.gflownet.generator.proxy.train_proxy import train_proxy
 from testing_engines.gflownet.generator.generative_model.main import generate_samples_with_gfn
 from testing_engines.gflownet.generator.pre_process.transform_actions import decode, encode
-from testing_engines.gflownet.lib.InstrumentSetting import launch_apollo, stop_apollo
 from testing_engines.gflownet.lib.monitor import Monitor
 from testing_engines.gflownet.path_config import path_args
 from testing_engines.gflownet.tools.remove_useless_action import remove_useless_action
@@ -167,7 +166,7 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
     new_dataset = []
     # print("Uncovered specs before batch {}: {}".format(batch_no, len(remain_specs)))
     # just testing half of the batch.
-    for item in testcases[1:]:
+    for item in testcases[:]:
         reward = [-100000.0] * 82
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
@@ -259,8 +258,8 @@ def test_session(session, total_specs_num, remained_specs):
         # time.sleep(55)
         # print("Apollo launching success.")
         start = datetime.now()
-        new_testcase_batch = generate_scenarios_batch(history_data, session)
-        # new_testcase_batch = generate_one_scenario()
+        # new_testcase_batch = generate_scenarios_batch(history_data, session)
+        new_testcase_batch = generate_one_scenario()
         # new_testcase_batch = debug_new_batch(session)
         end = datetime.now()
         logging.info("learning cost: {}".format(end - start))

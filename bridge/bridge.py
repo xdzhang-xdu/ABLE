@@ -32,15 +32,24 @@ from map_for_bridge import get_map_info
 
 import time
 
+# Communicating with simulator
+SIMULATOR_HOST = "localhost"
+SIMULATOR_PORT = 8181
 
+# Communicating with Apollo cyber rt.
+APOLLO_BRIDGE_HOST = "127.0.0.1"
+APOLLO_BRIDGE_PORT = 9090
 
+# Communicating with our algorithm
+OUR_WS_HOST = 'localhost'
+OUR_WS_PORT = 8000
 
 class Server:
     def __init__(self):
-        self.SIMULATOR_HOST = os.environ.get("SIMULATOR_HOST", "169.254.42.175")
-        self.SIMULATOR_PORT = int(os.environ.get("SIMULATOR_PORT", 8181))
-        self.BRIDGE_HOST = os.environ.get("BRIDGE_HOST", "127.0.0.1")
-        self.BRIDGE_PORT = int(os.environ.get("BRIDGE_PORT", 9090))
+        self.SIMULATOR_HOST = os.environ.get("SIMULATOR_HOST", SIMULATOR_HOST)
+        self.SIMULATOR_PORT = int(os.environ.get("SIMULATOR_PORT", SIMULATOR_PORT))
+        self.BRIDGE_HOST = os.environ.get("BRIDGE_HOST", APOLLO_BRIDGE_HOST)
+        self.BRIDGE_PORT = int(os.environ.get("BRIDGE_PORT", APOLLO_BRIDGE_PORT))
         self.sim = 0
         self.ego = 0
         self.destination_apollo = []
@@ -368,7 +377,7 @@ class Server:
 
 
             self.ego.on_collision(self.AVS_on_collision)
-            self.ego.connect_bridge(os.environ.get("BRIDGE_HOST", "169.254.42.170") ,port = 9090)
+            self.ego.connect_bridge(self.BRIDGE_HOST, port=9090)
             # bounding_box = ego.bounding_box()
             # print(bounding_box.size)
             self.Add_npc_vehicles_to_Lgsvl(npcList)
@@ -519,10 +528,10 @@ class Server:
                         self.result["npcList"][_i]["motion"][_j]["lane_position"] = self.convert_position_to_lane_position(self.result["npcList"][_i]["motion"][_j]["position"])
 
     def get_port(self):
-        return os.getenv('WS_PORT', '8000')
+        return os.getenv('WS_PORT', OUR_WS_PORT)
 
     def get_host(self):
-        return os.getenv('WS_HOST', 'localhost')
+        return os.getenv('WS_HOST', OUR_WS_HOST)
 
     def start(self):
         return websockets.serve(self.handler, self.get_host(), self.get_port() ,ping_interval=None)
@@ -543,7 +552,7 @@ class Server:
       async for message in websocket:
         # print('server received ')
         msg = json.loads(message)
-        response = {'TYPE': None, 'DATA':None }
+        response = {'TYPE': None, 'DATA': None}
 
         if msg['CMD'] == 'CMD_READY_FOR_NEW_TEST':
             response['TYPE'] = 'READY_FOR_NEW_TEST'
@@ -552,6 +561,7 @@ class Server:
             try:
                 await websocket.send(json.dumps(response))
             except websocket.exceptions as e: #fail
+                print(e)
                 response['TYPE'] = 'ERROR'
                 response['DATA'] = None
                 await websocket.send(json.dumps(response))

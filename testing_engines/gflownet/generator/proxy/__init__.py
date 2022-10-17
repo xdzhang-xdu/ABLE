@@ -1,1 +1,1 @@
-import proxy
+import testing_engines.gflownet.generator.proxy

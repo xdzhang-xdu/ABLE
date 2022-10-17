@@ -13,7 +13,6 @@ from testing_engines.gflownet.generator.proxy.proxy_config import proxy_args
 from testing_engines.gflownet.generator.proxy.train_proxy import train_proxy
 from testing_engines.gflownet.generator.generative_model.main import generate_samples_with_gfn
 from testing_engines.gflownet.generator.pre_process.transform_actions import decode, encode
-from testing_engines.gflownet.lib.InstrumentSetting import launch_apollo, stop_apollo
 from testing_engines.gflownet.lib.monitor import Monitor
 from testing_engines.gflownet.path_config import path_args
 from testing_engines.gflownet.tools.remove_useless_action import remove_useless_action
