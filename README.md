@@ -1,5 +1,5 @@
 # Prerequisites
-1. A computer powerful enogh for running Apollo+LGSVL. 
+1. A computer powerful enogh for running Apollo+LGSVL-2021.1. 
 (Or two computers: one for Apollo, one for LGSVL)
 2. rtamt (evaluating robustness degree of an STL formula, please refer to [the github page](https://github.com/nickovic/rtamt))
 3. python3
