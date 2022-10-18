@@ -5,7 +5,7 @@
 3. python3
    ```bash
    sudo pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
-   sudo pip3 install websockets pandas sklearn tqdm
+   sudo pip3 install websockets pandas sklearn tqdm wsaccel shapely
    ```
 
 # Step by step
