@@ -281,7 +281,7 @@ def test_session(session, total_specs_num, remained_specs):
 """
 specs_to_index = dict()
 specs_weight = [1]*81
-active_learning_loop = 1
+active_learning_loop = 100
 
 
 if __name__ == "__main__":

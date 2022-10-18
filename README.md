@@ -1,7 +1,7 @@
 # Prerequisites
 1. A computer powerful enogh for running Apollo+LGSVL-2021.1. 
 (Or two computers: one for Apollo, one for LGSVL)
-2. rtamt (evaluating robustness degree of an STL formula, please refer to [the github page](https://github.com/nickovic/rtamt))
+2. rtamt (evaluating robustness degree of an STL formula, please refer to [the github page](https://github.com/nickovic/rtamt), downgrade antlr4 under 4.8)
 3. python3
    ```bash
    sudo pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
