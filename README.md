@@ -7,6 +7,7 @@
    sudo pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
    sudo pip3 install websockets pandas sklearn tqdm wsaccel shapely
    ```
+4. Downgrade protobuf to version 3.19.
 
 # Step by step
 
