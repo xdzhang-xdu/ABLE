@@ -14,7 +14,9 @@
 ## Run Apollo with LGSVL
 Please refer to [the detailed documentation](https://www.svlsimulator.com/docs/system-under-test/apollo-master-instructions/) for co-simulation of Apollo with LGSVL.
 Set the LGSVL to API-Only mode.
-Then, Install the customized map map/original_map/base_map.bin to Apollo with the [guide](https://github.com/lgsvl/apollo-5.0/tree/simulator/modules/map/data).
+
+Copy the content in `map/san_francisco` folder to Apollo: `apollo/modules/map/data/san_francisco/`
+<!-- Then, Install the customized map map/original_map/base_map.bin to Apollo with the [guide](https://github.com/lgsvl/apollo-5.0/tree/simulator/modules/map/data). -->
 
 ## Setup our bridge.
 1. Download and go to the root. Note that the source code should be downloaded and set up on the computer running Apollo.
@@ -67,3 +69,30 @@ python3 GFN_Fuzzing.py
 ```
 If the brige is set properly, you will see the LGSVL and Apollo running. The results will be put into a folder that you set in path_config.py.
 
+
+# Docker version
+We have wrapped `ABLE` in  `Dockerfile`.
+
+If you can run `Apollo` in docker, then you're already good to go.
+
+The following steps are for setting up the docker image. You need to run only once.
+
+0. update the path in `testing_engines/gflownet/path_config.py` to the following data: 
+```
+"test_result_direct": "/tmp/ABLE_output/data/apollo7/active+max/{}",
+"debug_result_direct": "/tmp/ABLE_output/data/apollo7/debug/{}",
+```
+
+1. create an output folder at path `output_dir`, say: `/tmp/output_dir`
+
+2. update the output directory path in the `docker_start.sh` file
+
+3. open a terminal and `bash docker_build.sh`
+
+The following steps are for running `ABLE`:
+
+1. open a terminal and run: <br>`bash docker_start.sh`.<br>This will run a docker container with all the dependencies installed. 
+
+2. within the docker container of step 1, run bridge: <br>`cd bridge && python bridge.py`
+
+3. open another terminal and run: <br>`bash docker_enter.sh`. <br>This will enter the same docker container in step 1, run fuzzing using:<br> `cd testing_engines/gflownet && python GFN_Fuzzing.py`
