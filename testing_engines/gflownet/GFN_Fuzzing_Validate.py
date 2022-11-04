@@ -145,6 +145,30 @@ def load_testcases(spec, session):
         json_obj = json.load(file)
         return json_obj[spec]
 
+def load_testing_scenario(scenario_path):
+    with open(scenario_path) as f:
+        data = json.load(f)
+        del data["groundTruthPerception"]
+        del data["testFailures"]
+        del data["testResult"]
+        del data["minEgoObsDist"]
+        del data["destinationReached"]
+        del data["trace"]
+        del data["completed"]
+    return data
+
+def load_testing_scenario_sunyang(scenario_path):
+    with open(scenario_path) as f:
+        data = json.load(f)
+    return data
+
+def load_specification(spec_name):
+    spec_path = "/home/xdzhang/ABLE/Specification/violation_formulae.json"
+    with open(spec_path) as file:
+        specs = json.load(file)
+        return specs[spec_name]
+
+
 def load_specifications():
     with open(path_args.spec_path) as file:
         specs = json.load(file)
@@ -233,7 +257,7 @@ def test_session(session, testcases, remained_specs):
     for _ in range(100):
         covered_specs = test_scenario_batch(testcases, remained_specs, log_direct)
         if len(covered_specs) != 0:
-            print("Repay is successful.")
+            print("Replay is successful.")
             break
         else:
             print("Continue....")
@@ -249,9 +273,13 @@ active_learning_loop = 1
 if __name__ == "__main__":
     start = datetime.now()
     sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    # sessions = ['lane_change']
-    session = 'lane_change'
-    target_spec = 'eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))'
-    new_testcases = load_testcases(target_spec, session)
-    print(len(new_testcases), new_testcases)
-    test_session(session, new_testcases, [target_spec])
+    session = 't_junction'
+    buggy_testing_scenario = "sub_law_violation_5"
+    # path = '/home/xdzhang/ABLE/testing_engines/gflownet/validate/apollo7/{}/{}.json'.format(session, buggy_testing_scenario)
+    # new_testcases = load_testcases(target_spec, session)
+    # testcase = load_testing_scenario(path)
+    path = "/home/xdzhang/data/rerun_for_videos/T-Junction/hesitate_at_yellow_light3.json"
+    testcase = load_testing_scenario_sunyang(path)
+    target_spec = load_specification(buggy_testing_scenario)
+    print(testcase)
+    test_session(session, [testcase], [target_spec])

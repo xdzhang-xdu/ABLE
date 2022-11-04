@@ -1,0 +1,362 @@
+{
+  "ScenarioName": "scenario0",
+  "MapVariable": "",
+  "map": "san_francisco",
+  "time": {
+    "hour": 14,
+    "minute": 31
+  },
+  "weather": {
+    "rain": 0.7947671476937465,
+    "fog": 0.0004902001599741412,
+    "wetness": 0.12727507484321965
+  },
+  "ego": {
+    "ID": "ego_vehicle",
+    "name": "gt_sensors",
+    "groundTruthPerception": true,
+    "color": null,
+    "start": {
+      "lane_position": {
+        "lane": "lane_623",
+        "offset": 46.16551266397038,
+        "roadID": null
+      },
+      "heading": {
+        "ref_lane_point": {
+          "lane": "lane_623",
+          "offset": 46.16551266397038,
+          "roadID": null
+        },
+        "ref_angle": 0.0
+      },
+      "speed": 0.0
+    },
+    "destination": {
+      "lane_position": {
+        "lane": "lane_145",
+        "offset": 50.0,
+        "roadID": null
+      },
+      "heading": {
+        "ref_lane_point": {
+          "lane": "lane_145",
+          "offset": 50.0,
+          "roadID": null
+        },
+        "ref_angle": 0.0
+      },
+      "speed": 0.0
+    }
+  },
+  "npcList": [
+    {
+      "ID": "npc1",
+      "name": "Hatchback",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_627",
+          "offset": 139.0268327496355,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_627",
+            "offset": 139.0268327496355,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 9.154487599278035
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 141.79483052690867,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 141.79483052690867,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 3.079355306839732
+        },
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 146.57063854767452,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 146.57063854767452,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 2.015371462877729
+        },
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 197.60247253684835,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 197.60247253684835,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 5.204192307530115
+        },
+        {
+          "lane_position": {
+            "lane": "lane_899",
+            "offset": 6.5373286079716975,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_899",
+              "offset": 6.5373286079716975,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 8.063472723529852
+        },
+        {
+          "lane_position": {
+            "lane": "lane_145",
+            "offset": 8.558131833001763,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_145",
+              "offset": 8.558131833001763,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 9.31600367881172
+        },
+        {
+          "lane_position": {
+            "lane": "lane_145",
+            "offset": 131.1951035401993,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_145",
+              "offset": 131.1951035401993,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 1.2920749226037462
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_145",
+          "offset": 131.1951035401993,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_145",
+            "offset": 131.1951035401993,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc2",
+      "name": "SUV",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_627",
+          "offset": 151.73036891208926,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_627",
+            "offset": 151.73036891208926,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 8.3889541492931
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_151",
+            "offset": 53.377795376573246,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_151",
+              "offset": 53.377795376573246,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 1.4590882169169928
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_151",
+          "offset": 53.95363918333673,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_151",
+            "offset": 53.95363918333673,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc3",
+      "name": "Hatchback",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_626",
+          "offset": 143.74379963516708,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_626",
+            "offset": 143.74379963516708,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 5.345015331815043
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_150",
+            "offset": 50.79916209189667,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_150",
+              "offset": 50.79916209189667,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 1.212929800405086
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_150",
+          "offset": 54.372685206072646,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_150",
+            "offset": 54.372685206072646,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc4",
+      "name": "SUV",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_625",
+          "offset": 148.46367500187895,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_625",
+            "offset": 148.46367500187895,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 6.176781003579649
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_149",
+            "offset": 30.360861237905286,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_149",
+              "offset": 30.360861237905286,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 1.2248756393560885
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_149",
+          "offset": 30.360861237905286,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_149",
+            "offset": 30.360861237905286,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    }
+  ],
+  "pedestrianList": [],
+  "obstacleList": [],
+  "AgentNames": [
+    "npc1",
+    "npc2",
+    "npc3",
+    "npc4"
+  ]
+}

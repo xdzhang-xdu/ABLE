@@ -1,0 +1,362 @@
+{
+  "ScenarioName": "scenario0",
+  "MapVariable": "",
+  "map": "san_francisco",
+  "time": {
+    "hour": 12,
+    "minute": 8
+  },
+  "weather": {
+    "rain": 0.33136231683368267,
+    "fog": 0.8528494912185164,
+    "wetness": 0.45167941124104705
+  },
+  "ego": {
+    "ID": "ego_vehicle",
+    "name": "gt_sensors",
+    "groundTruthPerception": true,
+    "color": null,
+    "start": {
+      "lane_position": {
+        "lane": "lane_623",
+        "offset": 49.00560683640313,
+        "roadID": null
+      },
+      "heading": {
+        "ref_lane_point": {
+          "lane": "lane_623",
+          "offset": 49.00560683640313,
+          "roadID": null
+        },
+        "ref_angle": 0.0
+      },
+      "speed": 0.0
+    },
+    "destination": {
+      "lane_position": {
+        "lane": "lane_145",
+        "offset": 50.0,
+        "roadID": null
+      },
+      "heading": {
+        "ref_lane_point": {
+          "lane": "lane_145",
+          "offset": 50.0,
+          "roadID": null
+        },
+        "ref_angle": 0.0
+      },
+      "speed": 0.0
+    }
+  },
+  "npcList": [
+    {
+      "ID": "npc1",
+      "name": "Jeep",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_627",
+          "offset": 138.87265072531315,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_627",
+            "offset": 138.87265072531315,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 5.08691702266777
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 138.87265072531315,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 138.87265072531315,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 4.231307863829646
+        },
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 150.263162270185,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 150.263162270185,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 7.659998515364568
+        },
+        {
+          "lane_position": {
+            "lane": "lane_627",
+            "offset": 198.94891350409972,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_627",
+              "offset": 198.94891350409972,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 8.578745209755688
+        },
+        {
+          "lane_position": {
+            "lane": "lane_899",
+            "offset": 6.13404064697904,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_899",
+              "offset": 6.13404064697904,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 3.7486353324076727
+        },
+        {
+          "lane_position": {
+            "lane": "lane_145",
+            "offset": 11.22789097493741,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_145",
+              "offset": 11.22789097493741,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 7.359610626674197
+        },
+        {
+          "lane_position": {
+            "lane": "lane_145",
+            "offset": 131.5497242443039,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_145",
+              "offset": 131.5497242443039,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 0.5
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_145",
+          "offset": 131.5497242443039,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_145",
+            "offset": 131.5497242443039,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc2",
+      "name": "SchoolBus",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_627",
+          "offset": 149.46086319006722,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_627",
+            "offset": 149.46086319006722,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 7.959960815946894
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_151",
+            "offset": 51.55433326442119,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_151",
+              "offset": 51.55433326442119,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 0.5469045043578027
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_151",
+          "offset": 51.55433326442119,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_151",
+            "offset": 51.55433326442119,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc3",
+      "name": "BoxTruck",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_626",
+          "offset": 140.42794451921554,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_626",
+            "offset": 140.42794451921554,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 9.037577264833967
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_150",
+            "offset": 50.825095461338194,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_150",
+              "offset": 50.825095461338194,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 0.5
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_150",
+          "offset": 50.825095461338194,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_150",
+            "offset": 50.825095461338194,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    },
+    {
+      "ID": "npc4",
+      "name": "BoxTruck",
+      "color": null,
+      "start": {
+        "lane_position": {
+          "lane": "lane_625",
+          "offset": 149.97727063506503,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_625",
+            "offset": 149.97727063506503,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 5.321064446590757
+      },
+      "motion": [
+        {
+          "lane_position": {
+            "lane": "lane_149",
+            "offset": 30.653983589581873,
+            "roadID": null
+          },
+          "heading": {
+            "ref_lane_point": {
+              "lane": "lane_149",
+              "offset": 30.653983589581873,
+              "roadID": null
+            },
+            "ref_angle": 0.0
+          },
+          "speed": 0.5
+        }
+      ],
+      "destination": {
+        "lane_position": {
+          "lane": "lane_149",
+          "offset": 31.78971136024595,
+          "roadID": null
+        },
+        "heading": {
+          "ref_lane_point": {
+            "lane": "lane_149",
+            "offset": 31.78971136024595,
+            "roadID": null
+          },
+          "ref_angle": 0.0
+        },
+        "speed": 0.0
+      }
+    }
+  ],
+  "pedestrianList": [],
+  "obstacleList": [],
+  "AgentNames": [
+    "npc1",
+    "npc2",
+    "npc3",
+    "npc4"
+  ]
+}
