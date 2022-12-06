@@ -1,0 +1,3 @@
+{
+  "/home/xdzhang/ABLE/test_cases/buggy_scenarios/T-Junction/Green_Light_Rush_Cause_Collisions2.json": "eventually(((direction==1)and(PriorityNPCAhead==1))and(always[0,2](not(speed<0.5))))"
+}
