@@ -651,7 +651,9 @@ class Server:
     def restart_module(self, module):
         dv = lgsvl.dreamview.Connection(self.sim, self.ego, self.BRIDGE_HOST)
         dv.disable_module(module)
+        time.sleep(0.01)
         dv.enable_module(module)
+        time.sleep(0.1)
         return
 
 

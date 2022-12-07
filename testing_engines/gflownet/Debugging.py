@@ -182,14 +182,15 @@ async def restart_module(module) -> object:
     async with websockets.connect(uri, max_size=300000000, ping_interval=None) as websocket:
         msg = json.dumps({'CMD': 'RESTART_MODULE', 'Module': module})
         await websocket.send(msg)
-        print('sent ', msg)
+        # print('Sent ', msg)
         while True:
             msg = await websocket.recv()
-            print('recieved ', msg)
+            # print('Received ', msg)
             msg = json.loads(msg)
             if msg['TYPE'] == 'RESTART_MODULE_FINISHED':
                 send_msg = {'CMD': "KEEP_SERVER_AND_CLIENT_ALIVE", 'DATA': None}
                 await websocket.send(json.dumps(send_msg))
+                break
             elif msg['TYPE'] == 'KEEP_SERVER_AND_CLIENT_ALIVE':
                 break
             else:
@@ -279,7 +280,7 @@ def test_scenario_batch(testcases, remained_specs, file_directory):
             'Traffic Light',
             'Control'
         ]
-        loop.run_until_complete(asyncio.gather(asyncio.gather(restart_module(modules[4]))))
+        loop.run_until_complete(asyncio.gather(asyncio.gather(restart_module(modules[3]))))
     return covered_specs
 
 
@@ -406,6 +407,10 @@ def apply_change_to_ads(configuration):
         new_config = "".join(tmp_configs)
     with open(configuration_path, "w") as f:
         f.write(new_config)
+    #
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(restart_module('Prediction'))
+    print("Applied change to ADS, and restarted the modules.")
 
 
 def is_harmless_and_relevant(passed_scenarios, breaking_scenarios):
@@ -435,7 +440,7 @@ def is_harmless_and_relevant(passed_scenarios, breaking_scenarios):
 def cause_analysis(original_parameters, passed_scenarios, breaking_scenarios):
     relevant_parameters = []
     for para, value in original_parameters.items():
-        changed_value = value * 1.5
+        changed_value = value * 0.5
         changed_configuration = copy.deepcopy(original_parameters)
         changed_configuration[para] = changed_value
         apply_change_to_ads(changed_configuration)
@@ -446,7 +451,7 @@ def cause_analysis(original_parameters, passed_scenarios, breaking_scenarios):
 
 
 def mutate(relevant_parameters):
-    ops = [1, 0.95, 1.05, 0.9, 1.1]
+    ops = [0.85, 0.95, 1.05, 0.9, 1.1, 1.15]
     new_individual = []
     for item in relevant_parameters:
         index = random.randint(0, len(ops) - 1)
@@ -474,7 +479,11 @@ def compute_fitness(original_parameters, generation, breaking_scenarios):
             with open(scenario_path, "r") as f:
                 scenario_json = json.load(f)
             loop = asyncio.get_event_loop()
-            degree = degree + loop.run_until_complete(law_complying_degree(scenario_json, spec, directory=log_directory))
+            flag, tmp_degree = loop.run_until_complete(law_complying_degree(scenario_json, spec, directory=log_directory))
+            if flag is True and tmp_degree >= 0:
+                degree = degree + 1
+            else:
+                degree = degree + 0.0
             # degree = degree + random.random()
         distance = euclidean_distance(original_parameters, individual[0])
         fitness = degree / math.exp(distance)
@@ -501,6 +510,7 @@ def misconfiguration_fix(original_parameters, relevant_parameters, breaking_scen
         for i in range(num_population//2):
             new_individual = mutate(generation[i][0])
             generation.append((new_individual, 0.0))
+        assert len(generation) == num_population
         random.shuffle(generation)
         for i in range(num_population//2):
             a = generation[i][0]
@@ -519,6 +529,7 @@ def fix_bugs():
     print("Root cause analysis....")
     relevant_parameters = cause_analysis(original_parameters, passed_scenarios, breaking_scenarios)
     # relevant_parameters = [('still_obstacle_speed_threshold', 0.99), ('still_pedestrian_speed_threshold', 0.2)]
+    # apply_change_to_ads(dict(relevant_parameters))
     print("Misconfiguration fixing....")
     misconfiguration_fix(original_parameters, relevant_parameters, breaking_scenarios)
 
@@ -535,8 +546,8 @@ num_generation = 20
 log_directory = "/home/xdzhang/test_data"
 
 if __name__ == "__main__":
-    analyze_bugs()
-    # fix_bugs()
+    # analyze_bugs()
+    fix_bugs()
     exit(98)
 
     start = datetime.now()
