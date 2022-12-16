@@ -281,13 +281,13 @@ def test_session(session, total_specs_num, remained_specs):
 """
 specs_to_index = dict()
 specs_weight = [1]*81
-active_learning_loop = 100
+active_learning_loop = 4
 
 
 if __name__ == "__main__":
     start = datetime.now()
     # sessions = ['double_direction', 'single_direction', 'lane_change', 't_junction']
-    sessions = ['t_junction']
+    sessions = ['double_direction']
     # all_specs and specs_to_index have the same ordering for each spec
     all_specs, specs_to_index = load_specifications()
     total_specs_num = len(all_specs)
