@@ -108,7 +108,7 @@ class CyberBridgeInstance:
                 self.testFailures.append("Couldnt connect with the socket-server: " + str(err))
                 print("Couldnt connect with the socket-server: %s\n terminating program" % err)
         else:
-            print('The status of connection is: ' + str(connect_status))
+            print('The status of connection is: ' + str(self.connect_status))
             pass
 
     def disconnect(self):
@@ -124,7 +124,7 @@ class CyberBridgeInstance:
                 print("Send Error: %s\n terminating program" % err)
                 self.disconnect()
         else:
-            ptint('Not Connected! Send Fail!')
+            print('Not Connected! Send Fail!')
 
     def receive(self):
         if self.connect_status == 'connected':
