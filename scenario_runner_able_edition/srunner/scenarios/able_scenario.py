@@ -32,7 +32,7 @@ class ABLEScenario(BasicScenario):
     """
 
     def __init__(self, world, ego_vehicles, config, debug_mode=False,
-                 terminate_on_failure=False, criteria_enable=False, timeout=180):
+                 terminate_on_failure=False, criteria_enable=False, timeout=100):
         """
         Initialize all parameters required for NewScenario
         """

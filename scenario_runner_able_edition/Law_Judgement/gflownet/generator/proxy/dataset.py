@@ -1,15 +1,15 @@
 import torch
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import re
+import random
 #import json
 #import numpy as np
 
 
 class ProxySet(Dataset):
-    def __init__(self, testset, train):
+    def __init__(self, testset, train, robustness_idx=0):
         actions_set = set()
         self.actions = []
         self.rewards = []
@@ -19,19 +19,19 @@ class ProxySet(Dataset):
         for tset in testset:
             self.actions.append(tset['actions'])
             max_len = max(max_len, len(tset['actions']))
-            self.rewards.append(tset['robustness'][0])
+            self.rewards.append(tset['robustness'][robustness_idx])
             for action in tset['actions']:
                 actions_set.add(action)
-        for tset in testset:
-            while len(tset['actions']) < max_len:
-                tset['actions'].append(',')
-            #tset['actions'][-1] = '.'
+        shuffled_actions = self.actions.copy()
+        random.shuffle(shuffled_actions)
+        shuffled_rewards = self.rewards.copy()
+        random.shuffle(shuffled_rewards)
         if train is True:
-            self.data = self.actions[:int(len(self.actions) * 0.8)]
-            self.target = self.rewards[:int(len(self.actions) * 0.8)]
+            self.data = shuffled_actions[:int(len(self.actions) * 0.8)]
+            self.target = shuffled_rewards[:int(len(self.actions) * 0.8)]
         else:
-            self.data = self.actions[int(len(self.actions) * 0.8):]
-            self.target = self.rewards[int(len(self.actions) * 0.8):]
+            self.data = shuffled_actions[int(len(self.actions) * 0.8):]
+            self.target = shuffled_rewards[int(len(self.actions) * 0.8):]
 
         self.max_len = max_len#len(self.actions[0])
         self.actions_list = sorted(list(actions_set))

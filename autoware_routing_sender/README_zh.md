@@ -1,0 +1,24 @@
+Autoware疑难解决
+
+1、import carla发生错误
+务必在非conda环境的python里import，需要退出conda环境
+conda deactivate
+
+2、运行open planner所需的python包
+py_trees
+networkx
+tabulate
+transforms3d
+
+3、Autoware从启动到准备好驾驶之间花费时间过长
+open planner bridge只传输gnss等传感器数据，Autoware通过NDT模块扫描地图并自行运行算法估算主车位置。
+以Carla Town05为例，启动节点和加载地图花费30秒，加载点云地图花费60秒，NDT模块估算主车位置花费3分30秒左右，估算位置花费极长时间，并有可能使点云地图和道路地图出现误差角度。
+通过外部指定主车位置和朝向来跳过NDT模块的位置估算过程，修改autoware/src下的各个launch.xml启动文件、yaml配置文件和cpp文件并重新编译，使点云地图加载完成后立刻指定主车位置和朝向。
+原链接：https://github.com/autowarefoundation/autoware.universe/pull/6692
+全部修改文件及目录结构保存在src_minimum中，src_extend额外拓展了planning_simulator.launch.xml的启动选项便于快速测试。
+
+4、Autoware设置目的地后没有产生规划的路径
+切换operation mode从STOP至LOCAL，然后设置目的地，应该会产生规划的路径。
+
+5、operation mode无法切换至AUTO
+替换operation_mode_transition_manager.param.yaml和operation_mode.cpp文件至autoware/src下的相应同名文件并重新编译，可以让系统强制进行模式转换并开始行驶。

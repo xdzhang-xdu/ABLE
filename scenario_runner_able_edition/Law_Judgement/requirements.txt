@@ -1,0 +1,4 @@
+numpy
+rtamt==0.3
+Shapely==1.8.5.post1
+antlr4-python3-runtime==4.5

@@ -39,21 +39,11 @@ def get_trainset_parrellel(path_mutated):
     for traceset_mutated in os.listdir(path_mutated):
         files.append(path_mutated + traceset_mutated)
 
-    with ProcessPoolExecutor(max_workers=16) as executor:
+    with ProcessPoolExecutor(max_workers=24) as executor:
         for dataset_scenario in executor.map(load_and_process_json_data, files):
             trainset.extend(dataset_scenario)
 
     return trainset
-
-def get_motion_amount(actionseq):
-    motion_amount = []
-    idx = -1
-    for action in actionseq:
-        if "motion" in action:
-            idx = int(action.split("+")[2])
-        if idx > 0 and "destination+lane_position" in action:
-            motion_amount.append(idx)
-    return motion_amount
 
 def get_trainset(path_mutated):
     trainset = []
@@ -65,7 +55,6 @@ def get_trainset(path_mutated):
         print(traceset_mutated)
         for scenario in dataset_scenario:
             encode(scenario)
-            #print(get_motion_amount(scenario["actions"]), len(scenario["actions"]))
 
             """
             monitor = Monitor(scenario)
@@ -79,7 +68,7 @@ def get_trainset(path_mutated):
         #    print(action)
         
         trainset.extend(dataset_scenario)
-        exit()
+        break
 
     return trainset
 

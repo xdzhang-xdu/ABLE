@@ -1,12 +1,10 @@
 import torch
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset,DataLoader
 import re 
-import json
-
-import numpy as np
+#import json
+#import numpy as np
 # deleted version only 14 states left 
 
 
@@ -21,10 +19,10 @@ class GFNSet(Dataset):
         self.redun_dict = {}
         self.states_list = []
         for tset in testset:
-            self.actions.append(tset['actions'])
+            self.actions.append(tset['actions'].copy())
             self.rewards.append(tset['robustness'][0])
             for action in tset['actions']:
-                actions_set.add(action)
+                actions_set.add(str(action))
         self.proxy_max_len = len(self.actions[0])
         self.max_len = len(self.actions[0])
         if g_flag is False:

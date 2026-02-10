@@ -205,7 +205,7 @@ class Trace:
         else:
             self.trace["currentlane-forTrafficRule"]['direction'].append(0)
 
-        max_speed = 90.0
+        max_speed = 30.0
         min_speed = -0.5
         self.trace["speedLimit-forTrafficRule"]['lowerLimit'].append(min_speed)
         if 'upperLimit' in ego:

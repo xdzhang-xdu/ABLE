@@ -11,7 +11,7 @@ args = AttrDict(
     # hidden_layers的神经元数量,fix
     "proxy_num_hid":proxy_args.num_hid,
     # batch_size 大小这个数字越大越好
-    "batch_size":256,#128,
+    "batch_size":128,#128,
     # emb_dim emdding vector的维度
     "emb_dim":512,
     # n_layers hidden layers数量 2,4,8选择
@@ -19,7 +19,7 @@ args = AttrDict(
     # hidden neuron数量,越大越好
     "n_hid":256,
     # n_train_steps 训练本身epoch数量,越大越好
-    "n_train_steps":1000,#1000,
+    "n_train_steps":1000,
     # generated_number 生成的数量需要乘以batch_size,才是真正生成的数量
     "generated_number": 1,
     }

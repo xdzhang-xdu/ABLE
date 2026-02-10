@@ -354,6 +354,8 @@ def decode(scenario):
                     scenario["npcList"][idx][list_str[1]][list_str[2]]["offset"] = float(list_str[-1])
                 elif list_str[2] == "speed":
                     scenario["npcList"][idx][list_str[1]][list_str[2]] = float(list_str[-1])
+        elif action == "," or action == ".":
+            pass
         else:
             assert False, "No matching for action: " + action
 

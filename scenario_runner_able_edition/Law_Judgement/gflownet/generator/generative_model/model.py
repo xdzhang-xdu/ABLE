@@ -64,6 +64,7 @@ class TransformerModel(nn.Module):
         tensor = self.transformer(tensor)
         
         return tensor
+
 def make_mlp(l, act=nn.LeakyReLU(), tail=[]):
     """makes an MLP with no top layer activation"""
     return nn.Sequential(*(sum(

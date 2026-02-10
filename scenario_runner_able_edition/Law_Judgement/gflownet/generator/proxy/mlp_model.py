@@ -15,7 +15,6 @@ class MLP(nn.Module):
                  num_layers, max_len=60, dropout=0.1,
                  partition_init=150.0, use_checkpoint=False):
         super(MLP, self).__init__()
-        print("num_tokens:", num_tokens, "max_len:", max_len)
         self.input = nn.Linear(num_tokens * max_len, num_hid)
 
         hidden_layers = []

@@ -17,6 +17,7 @@ def judge_generated(x,actions_index,actions_category):
       break
   #sys.exit(0)
   return flag
+
 def sample2proxy(samples,redun_list,redun_dict,max_len,):
     generated = np.ones(shape=(len(samples),max_len))
     #print("samples")

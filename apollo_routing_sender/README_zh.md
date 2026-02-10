@@ -1,0 +1,18 @@
+Apollo疑难解决
+
+1.修正和添加xodr格式文件的Carla Town地图
+首先imap工具产生的地图在x轴有大约166021左右的误差，需要在xodr文件头部修改x_0的值，具体可能需要在dreamview中反复调整；
+其次脚本xodr2bin.sh自动生成Apollo需要的三类地图文件，该过程需要使用imap以及在Apollo的docker环境内的工具。
+
+2.Dreamview不显示红绿灯/Apollo不能检测到红绿灯
+在Apollo的base_map.txt地图文件中添加红绿灯的signal项以及关联道路和红绿灯的overlap项，并重新生成sim_map和routing_map。
+signal项是红绿灯的本体，其id一定要对应bridge向cyber node中apollo/perception/traffic_light写入的消息的红绿灯id一致。
+overlap项是红绿灯影响的道路，需要修改影响道路的起点终点范围（由s决定），并在对应的道路和红绿灯中添加。
+
+3.1 Apollo起步卡顿
+表现为规划的蓝色路径不停闪烁并伴有扭曲，车辆在原地反复起步和刹车（通过Dreamview右上角仪表盘可知），车辆无法正常起步，当赋予了一定的初速度后能够继续向前行驶。
+原因是规划的路线被反复刷新，在planning的日志中可以定位到文件trajectory_stitcher.cc，将关于时间戳的重新规划部分注释并重新编译后，Apollo可以正常规划路线，规划的蓝色路径较为稳定不再闪烁，车辆可以正常起步。猜测是bridge和Apollo在时间戳的计算上出现了误差造成Apollo反复重新规划路线。
+
+3.2 Apollo在转弯时偏离路线
+Apollo在转弯时车辆不能较好的维持在车道中间，向两边车道反复压线占道，部分原因是因为加速度数据出现了问题，以及过弯速度过高造成的。
+修改bridge中imu模块的错误代码，加速度计量的x与y赋值相反，并去除对x方向的最大加速度限制。

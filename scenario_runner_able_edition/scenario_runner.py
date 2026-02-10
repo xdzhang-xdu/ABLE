@@ -426,8 +426,8 @@ class ScenarioRunner(object):
                 _, able_file = os.path.split(self._args.able)
                 session, ext = os.path.splitext(able_file)
                 session = session.replace("_half", "").replace("_quater", "")
-                session = session.replace("trace_", "").replace("temp_", "")
-                CarlaDataProvider.set_traffic_lights(session)
+                session = session.replace("trace_", "")
+                CarlaDataProvider.set_traffic_lights("_".join(session.split("_")[:2]))
                 scenario = ABLEScenario(world=self.world,
                                         ego_vehicles=self.ego_vehicles,
                                         config=config)
