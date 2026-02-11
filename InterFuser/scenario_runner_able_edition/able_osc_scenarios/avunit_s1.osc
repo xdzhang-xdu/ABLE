@@ -1,0 +1,46 @@
+import able_basic.osc
+
+# tag::library-physical-angle[]
+type angle is SI(rad: 1)
+unit degree of angle is SI(rad: 1, factor: 57.295779513)
+unit deg    of angle is SI(rad: 1, factor: 57.295779513)
+unit radian of angle is SI(rad: 1, factor: 1)
+unit rad    of angle is SI(rad: 1, factor: 1)
+# end::library-physical-angle[]
+
+global carlamap: string = "Town06"
+
+scenario top:
+    path: Path
+    path.set_map(carlamap)
+    path.path_min_driving_lanes(2)
+    path.path_over_junction(direction: [0degree..360degree], distance_before: [1meter..40meter], distance_in: [1meter..40meter], distance_after: [5meter..40meter])
+
+    ego_vehicle: Model3
+    npc1: Rubicon
+    npc2: Rubicon
+    npc3: Rubicon
+    npc4: Rubicon
+
+    event start
+    event end
+
+    do serial:
+        init: parallel(duration: 120s):
+            ego_vehicle.drive(path) with:
+                speed([14.4kph..21.6kph])
+                lane(2, at: start)
+            
+            npc1.drive(path) with:
+                speed([14.4kph..21.6kph], at: start)
+                lane(1, at: start)
+            npc2.drive(path) with:
+                speed([14.4kph..21.6kph], at: start)
+                lane(right_of: npc1, at: start)
+                position([5m..10m], behind: npc1, at: start)
+            npc3.drive(path) with:
+                speed([14.4kph..21.6kph], at: start)
+                lane(right_of: npc2, at: start)
+            npc4.drive(path) with:
+                speed([14.4kph..21.6kph], at: start)
+                lane(right_of: npc3, at: start)
