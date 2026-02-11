@@ -1,3 +1,0 @@
-from parser.gen.AVScenariosParser import AVScenariosParser
-from parser.gen.AVScenariosLexer import AVScenariosLexer
-from parser.gen.AVScenariosListener import AVScenariosListener
